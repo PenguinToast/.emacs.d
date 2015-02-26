@@ -13,11 +13,6 @@
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
-(require 'auto-complete-config)
-(ac-config-default)
-;; (setq-default ac-sources (append ac-sources '(ac-source-semantic)))
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/dict")
-
 (add-hook 'dired-load-hook
           (lambda () (load "dired-x")))
 (autoload 'dired-jump "dired-x"
@@ -27,6 +22,8 @@
 
 (define-key global-map "\C-x\C-j" 'dired-jump)
 (define-key global-map "\C-x4\C-j" 'dired-jump-other-window)
+
+(add-hook 'after-init-hook 'global-company-mode)
 
 ;; lua mode 2 spaces for an indent 
 (setq lua-indent-level 2)
