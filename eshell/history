@@ -1,0 +1,64 @@
+ls
+echo $PATH
+top
+echo *
+find-file settings.gradle 
+echo $PATH
+find-file-other-window ~/.bashrc
+clear
+ls
+ll
+alias ll 'ls -l $*'
+ll
+cd ~
+ls
+ls .emacs.d/eshell/
+cat .emacs.d/eshell/alias 
+alias ff 'find-file $1'
+alias ffo 'find-file-other-window $1'
+alias emax 'find-file $1'
+recenter 0
+clear
+recenter-top-bottom
+recenter
+recenter --help
+man recenter
+recenter 0
+recenter 1
+recenter -1
+ls
+cd repo
+cd GameEngine/
+ls
+ffo build.gradle 
+ls
+cd desktop/
+ls
+ffo build.gradle
+./gradlew --version
+cd ..
+./gradlew --version
+./gradlew -version
+gradle --version
+gradle
+cd ..
+ls
+ls gradle
+gradle
+cd ..
+./gradlew desktop:classes
+echo $TERM
+echo $SHELL
+export TERM=xterm-256color
+./gradlew
+unset TERM
+./gradlew
+export TERM=eterm
+git status
+git log
+gradle
+cd .
+cd ..
+./gradlew
+exit
+exit
