@@ -24,6 +24,7 @@
 (define-key global-map "\C-x4\C-j" 'dired-jump-other-window)
 
 (add-hook 'after-init-hook 'global-company-mode)
+(global-set-key (kbd "M-/") 'company-complete)
 
 ;; lua mode 2 spaces for an indent 
 (setq lua-indent-level 2)
@@ -139,7 +140,7 @@
  ;; If there is more than one, they won't work right.
  '(frame-background-mode (quote light))
  '(shell-switcher-mode t)
- '(shell-switcher-new-shell-function (quote shell-switcher-make-ansi-term)))
+ '(shell-switcher-new-shell-function (quote shell-switcher-make-eshell)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
