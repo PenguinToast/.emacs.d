@@ -2,6 +2,12 @@
 
 (set-face-attribute 'default nil :height 90)
 
+(load "~/.emacs.d/config/cedet.el")
+(add-to-list 'load-path (expand-file-name
+      "~/.emacs.d/site-lisp/ecb/"))
+(require 'ecb)
+(setq ecb-tip-of-the-day nil)
+
 (add-to-list 'load-path "~/.emacs.d/lisp")
 
 (delete-selection-mode 1)
@@ -133,12 +139,73 @@
 (add-hook 'eshell-mode-hook 'shell-switcher-manually-register-shell)
 (add-hook 'term-mode-hook 'shell-switcher-manually-register-shell)
 
+(add-hook 'c-mode-common-hook
+         (lambda ()
+           (when (derived-mode-p 'c-mode 'c++-mode)
+             (subword-mode 1))))
+
+;(add-hook 'c-mode-common-hook
+;          (lambda ()
+;            (when (derived-mode-p 'c-mode 'c++-mode)
+;              (ggtags-mode 1))))
+
+;(require 'icicles)
+;(icy-mode 1)
+
+(add-to-list 'load-path "~/.emacs.d/site-lisp/magit/lisp")
+(require 'magit)
+
+(with-eval-after-load 'info
+ (info-initialize)
+ (add-to-list 'Info-directory-list
+	       "~/.emacs.d/lib/magit/Documentation/"))
+(global-set-key (kbd "C-x g") 'magit-status)
+
+(setq swapping-buffer nil)
+(setq swapping-window nil)
+(defun swap-buffers-in-windows ()
+  "Swap buffers between two windows"
+  (interactive)
+  (if (and swapping-window
+           swapping-buffer)
+      (let ((this-buffer (current-buffer))
+            (this-window (selected-window)))
+        (if (and (window-live-p swapping-window)
+                 (buffer-live-p swapping-buffer))
+            (progn (switch-to-buffer swapping-buffer)
+                   (select-window swapping-window)
+                   (switch-to-buffer this-buffer)
+                   (select-window this-window)
+                   (message "Swapped buffers."))
+          (message "Old buffer/window killed.  Aborting."))
+        (setq swapping-buffer nil)
+        (setq swapping-window nil))
+    (progn
+      (setq swapping-buffer (current-buffer))
+      (setq swapping-window (selected-window))
+      (message "Buffer and window marked for swapping."))))
+(global-set-key (kbd "C-c p") 'swap-buffers-in-windows)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-idle-delay 1)
+ '(ecb-layout-name "left3")
+ '(ecb-layout-window-sizes
+   (quote
+    (("left3"
+      (ecb-directories-buffer-name 0.20238095238095238 . 0.2897196261682243)
+      (ecb-sources-buffer-name 0.20238095238095238 . 0.2897196261682243)
+      (ecb-methods-buffer-name 0.20238095238095238 . 0.34579439252336447)))))
+ '(ecb-options-version "2.40")
+ '(ecb-source-path (quote (("~/rc/ramcloud/src" "ramcloud"))))
+ '(ede-project-directories (quote ("/home/william/rc/ramcloud")))
  '(frame-background-mode (quote light))
+ '(package-selected-packages
+   (quote
+    (workgroups2 win-switch starter-kit shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode ggtags company cmake-project cmake-mode auto-complete)))
  '(shell-switcher-mode t)
  '(shell-switcher-new-shell-function (quote shell-switcher-make-eshell)))
 (custom-set-faces
@@ -148,3 +215,4 @@
  ;; If there is more than one, they won't work right.
  )
 
+(put 'upcase-region 'disabled nil)
