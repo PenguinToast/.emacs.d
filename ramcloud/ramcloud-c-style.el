@@ -99,7 +99,7 @@ Suitable for inclusion in `c-offsets-alist'."
                        scope-operator))
     (c-offsets-alist . ((arglist-intro . ++)
                         (func-decl-cont . ++)
-                        (member-init-intro . ++)
+                        (member-init-intro . +)
                         (inher-intro . ++)
                         (comment-intro . 0)
                         (arglist-close . c-lineup-arglist)
