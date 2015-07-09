@@ -35,7 +35,7 @@
 ;; (require 'cedet-files)
 
 ;; load contrib library
-;; (require 'eassist)
+(require 'eassist)
 
 ;; customisation of modes
 (defun alexott/cedet-hook ()

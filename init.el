@@ -53,6 +53,13 @@
 (add-hook 'c-mode-common-hook 'ramcloud-make-newline-indent)
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 
+(defconst ramcloud-protobuf-style
+  '((c-basic-offset . 2)
+    (indent-tabs-mode . nil)))
+
+(add-hook 'protobuf-mode-hook
+          (lambda () (c-add-style "ramcloud-protobuf-style" ramcloud-protobuf-style t)))
+
 ;;; turn on syntax highlighting 
 (global-font-lock-mode 1) 
 ;; Part of the Emacs Starter Kit
@@ -82,11 +89,11 @@
 (add-hook 'java-mode-hook 'my-indent-setup)
 
 (defadvice kill-region (before unix-werase activate compile)
-      "When called interactively with no active region, delete a single word
+  "When called interactively with no active region, delete a single word
     backwards instead."
-      (interactive
-       (if mark-active (list (region-beginning) (region-end))
-         (list (save-excursion (backward-word 1) (point)) (point)))))
+  (interactive
+   (if mark-active (list (region-beginning) (region-end))
+     (list (save-excursion (backward-word 1) (point)) (point)))))
 
 (require 'revbufs)
 (setq-default fill-column 80)
@@ -144,6 +151,11 @@
            (when (derived-mode-p 'c-mode 'c++-mode)
              (subword-mode 1))))
 
+(add-hook 'c-mode-common-hook
+         (lambda ()
+           (when (derived-mode-p 'c-mode 'c++-mode)
+             (flycheck-select-checker 'c/c++-gcc))))
+
 ;(add-hook 'c-mode-common-hook
 ;          (lambda ()
 ;            (when (derived-mode-p 'c-mode 'c++-mode)
@@ -152,13 +164,13 @@
 ;(require 'icicles)
 ;(icy-mode 1)
 
-(add-to-list 'load-path "~/.emacs.d/site-lisp/magit/lisp")
-(require 'magit)
+;; (add-to-list 'load-path "~/.emacs.d/site-lisp/magit/lisp")
+;; (require 'magit)
 
-(with-eval-after-load 'info
- (info-initialize)
- (add-to-list 'Info-directory-list
-	       "~/.emacs.d/lib/magit/Documentation/"))
+;; (with-eval-after-load 'info
+ ;; (info-initialize)
+ ;; (add-to-list 'Info-directory-list
+	       ;; "~/.emacs.d/lib/magit/Documentation/"))
 (global-set-key (kbd "C-x g") 'magit-status)
 
 (setq swapping-buffer nil)
@@ -184,7 +196,9 @@
       (setq swapping-buffer (current-buffer))
       (setq swapping-window (selected-window))
       (message "Buffer and window marked for swapping."))))
-(global-set-key (kbd "C-c p") 'swap-buffers-in-windows)
+(global-set-key (kbd "C-x p") 'swap-buffers-in-windows)
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -202,10 +216,11 @@
  '(ecb-options-version "2.40")
  '(ecb-source-path (quote (("~/rc/ramcloud/src" "ramcloud"))))
  '(ede-project-directories (quote ("/home/william/rc/ramcloud")))
+ '(flycheck-gcc-language-standard "c++11")
  '(frame-background-mode (quote light))
  '(package-selected-packages
    (quote
-    (workgroups2 win-switch starter-kit shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode ggtags company cmake-project cmake-mode auto-complete)))
+    (protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch starter-kit shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode ggtags company cmake-project cmake-mode auto-complete)))
  '(shell-switcher-mode t)
  '(shell-switcher-new-shell-function (quote shell-switcher-make-eshell)))
 (custom-set-faces
