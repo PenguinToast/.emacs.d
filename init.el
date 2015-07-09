@@ -173,6 +173,8 @@
 	       ;; "~/.emacs.d/lib/magit/Documentation/"))
 (global-set-key (kbd "C-x g") 'magit-status)
 
+(add-hook 'before-save-hook 'whitespace-cleanup)
+
 (setq swapping-buffer nil)
 (setq swapping-window nil)
 (defun swap-buffers-in-windows ()
