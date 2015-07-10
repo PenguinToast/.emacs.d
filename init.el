@@ -32,7 +32,7 @@
 (add-hook 'after-init-hook 'global-company-mode)
 (global-set-key (kbd "M-/") 'company-complete)
 
-;; lua mode 2 spaces for an indent 
+;; lua mode 2 spaces for an indent
 (setq lua-indent-level 2)
 (add-hook 'json-mode-hook
           (lambda ()
@@ -60,23 +60,23 @@
 (add-hook 'protobuf-mode-hook
           (lambda () (c-add-style "ramcloud-protobuf-style" ramcloud-protobuf-style t)))
 
-;;; turn on syntax highlighting 
-(global-font-lock-mode 1) 
+;;; turn on syntax highlighting
+(global-font-lock-mode 1)
 ;; Part of the Emacs Starter Kit
 ;;
 ;; This is the first thing to get loaded.
 ;;
 
 ;;; use groovy-mode when file ends in .groovy or .gradle or has #!/bin/groovy at
-;;; start 
-(autoload 'groovy-mode "groovy-mode" "Major mode for editing Groovy code." t) 
+;;; start
+(autoload 'groovy-mode "groovy-mode" "Major mode for editing Groovy code." t)
 (add-to-list 'auto-mode-alist '("\\.groovy\\'" . groovy-mode))
 (add-to-list 'auto-mode-alist '("\\.gradle\\'" . groovy-mode))
 (add-to-list 'interpreter-mode-alist '("groovy" . groovy-mode))
-;;; make Groovy mode electric by default. 
-(add-hook 'groovy-mode-hook 
-          '(lambda () 
-             (require 'groovy-electric) 
+;;; make Groovy mode electric by default.
+(add-hook 'groovy-mode-hook
+          '(lambda ()
+             (require 'groovy-electric)
              (groovy-electric-mode)))
 
 (require 'java-mode-indent-annotations)
@@ -212,9 +212,9 @@
  '(ecb-layout-window-sizes
    (quote
     (("left3"
-      (ecb-directories-buffer-name 0.20238095238095238 . 0.2897196261682243)
-      (ecb-sources-buffer-name 0.20238095238095238 . 0.2897196261682243)
-      (ecb-methods-buffer-name 0.20238095238095238 . 0.34579439252336447)))))
+      (ecb-directories-buffer-name 0.20165745856353592 . 0.29)
+      (ecb-sources-buffer-name 0.20165745856353592 . 0.35)
+      (ecb-methods-buffer-name 0.20165745856353592 . 0.35)))))
  '(ecb-options-version "2.40")
  '(ecb-source-path (quote (("~/rc/ramcloud/src" "ramcloud"))))
  '(ede-project-directories (quote ("/home/william/rc/ramcloud")))
