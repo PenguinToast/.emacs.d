@@ -18,12 +18,16 @@
 ;; (add-to-list 'Info-directory-list
                      ;; "~/.emacs.d/site-lisp/cedet/doc/info")
 
+;; Take 2
+(load-file "~/.emacs.d/site-lisp/cedet/cedet-devel-load.el")
+
 ;; select which submodes we want to activate
 (add-to-list 'semantic-default-submodes 'global-semantic-mru-bookmark-mode)
 (add-to-list 'semantic-default-submodes 'global-semanticdb-minor-mode)
+;; (add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode t)
 (add-to-list 'semantic-default-submodes 'global-semantic-idle-scheduler-mode)
 (add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
-;; (add-to-list 'semantic-default-submodes 'global-cedet-m3-minor-mode)
+(add-to-list 'semantic-default-submodes 'global-cedet-m3-minor-mode)
 (add-to-list 'semantic-default-submodes 'global-semantic-highlight-func-mode)
 
 ;; Activate semantic
@@ -35,11 +39,11 @@
 ;; (require 'cedet-files)
 
 ;; load contrib library
-(require 'eassist)
+(load-file "~/.emacs.d/site-lisp/cedet/contrib/cedet-contrib-load.el")
 
 ;; customisation of modes
 (defun alexott/cedet-hook ()
-  
+
   (local-set-key "\C-c=" 'semantic-decoration-include-visit)
 
   (local-set-key "\M-." 'semantic-ia-fast-jump)
@@ -72,7 +76,7 @@
 
 ;; EDE
 (global-ede-mode 1)
-(ede-enable-generic-projects)
+;; (ede-enable-generic-projects)
 
 ;; Setup JAVA....
 ;; (require 'cedet-java)

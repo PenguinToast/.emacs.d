@@ -1,14 +1,11 @@
 ;; (setq stack-trace-on-error t)
 
-(set-face-attribute 'default nil :height 90)
-
-(load "~/.emacs.d/config/cedet.el")
+(add-to-list 'load-path "~/.emacs.d/lisp")
+(load-file "~/.emacs.d/config/cedet.el")
 (add-to-list 'load-path (expand-file-name
       "~/.emacs.d/site-lisp/ecb/"))
 (require 'ecb)
 (setq ecb-tip-of-the-day nil)
-
-(add-to-list 'load-path "~/.emacs.d/lisp")
 
 (delete-selection-mode 1)
 ;(add-hook 'lua-mode-hook 'ggtags-mode)
@@ -105,7 +102,7 @@
 (add-hook 'json-mode-hook 'fci-mode)
 
 (blink-cursor-mode 1)
-(set-face-attribute 'default nil :height 100)
+(set-face-attribute 'default nil :height 110)
 
 (require 'win-switch)
 (win-switch-authors-configuration)
@@ -201,12 +198,18 @@
 (global-set-key (kbd "C-x p") 'swap-buffers-in-windows)
 
 (add-hook 'after-init-hook #'global-flycheck-mode)
+(winner-mode 1)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-backends
+   (quote
+    (company-bbdb company-nxml company-css company-eclim company-semantic company-xcode company-cmake company-capf
+                  (company-dabbrev-code company-gtags company-etags company-keywords)
+                  company-oddmuse company-files company-dabbrev)))
  '(company-idle-delay 1)
  '(ecb-layout-name "left3")
  '(ecb-layout-window-sizes
@@ -216,13 +219,23 @@
       (ecb-sources-buffer-name 0.20165745856353592 . 0.35)
       (ecb-methods-buffer-name 0.20165745856353592 . 0.35)))))
  '(ecb-options-version "2.40")
- '(ecb-source-path (quote (("~/rc/ramcloud/src" "ramcloud"))))
+ '(ecb-source-path
+   (quote
+    (("~/rc/ramcloud/src" "ramcloud")
+     ("~/rc/ramcloud/src/btreeRamCloud" "ramcloud_btree"))))
  '(ede-project-directories (quote ("/home/william/rc/ramcloud")))
+ '(flycheck-c/c++-gcc-executable "gcc-4.9")
+ '(flycheck-checkers
+   (quote
+    (ada-gnat asciidoc c/c++-gcc c/c++-cppcheck cfengine chef-foodcritic coffee coffee-coffeelint coq css-csslint d-dmd emacs-lisp emacs-lisp-checkdoc erlang eruby-erubis fortran-gfortran go-gofmt go-golint go-vet go-build go-test go-errcheck haml handlebars haskell-ghc haskell-hlint html-tidy javascript-jshint javascript-eslint javascript-gjslint javascript-jscs javascript-standard json-jsonlint less luacheck lua perl perl-perlcritic php php-phpmd php-phpcs puppet-parser puppet-lint python-flake8 python-pylint python-pycompile r-lintr racket rpm-rpmlint rst rst-sphinx ruby-rubocop ruby-rubylint ruby ruby-jruby rust sass scala scala-scalastyle scss-lint scss sh-bash sh-posix-dash sh-posix-bash sh-zsh sh-shellcheck slim tex-chktex tex-lacheck texinfo verilog-verilator xml-xmlstarlet xml-xmllint yaml-jsyaml yaml-ruby)))
+ '(flycheck-gcc-include-path
+   (quote
+    ("/home/william/rc/ramcloud/obj.transaction-slik/" "/home/william/rc/ramcloud/gtest/include/")))
  '(flycheck-gcc-language-standard "c++11")
  '(frame-background-mode (quote light))
  '(package-selected-packages
    (quote
-    (protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch starter-kit shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode ggtags company cmake-project cmake-mode auto-complete)))
+    (actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch starter-kit shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
  '(shell-switcher-mode t)
  '(shell-switcher-new-shell-function (quote shell-switcher-make-eshell)))
 (custom-set-faces
