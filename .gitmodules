@@ -1,0 +1,9 @@
+[submodule "emacs-color-theme-solarized"]
+	path = emacs-color-theme-solarized
+	url = https://github.com/sellout/emacs-color-theme-solarized.git
+[submodule "site-lisp/cedet"]
+	path = site-lisp/cedet
+	url = git://git.code.sf.net/p/cedet/git
+[submodule "site-lisp/ecb"]
+	path = site-lisp/ecb
+	url = git@github.com:alexott/ecb.git

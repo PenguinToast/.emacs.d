@@ -12,12 +12,22 @@
 
 (require 'package)
 (add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
+	     '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
+(setq inhibit-splash-screen t)
+(setq inhibit-startup-message t)
+(menu-bar-mode 0)
+(tool-bar-mode -1)
+(define-global-minor-mode global-idle-highlight-mode ;;the name of the new global mode
+  idle-highlight-mode ;;the name of the minor mode you want to turn on
+  (lambda () (idle-highlight-mode t) ;;the function to turn on the mode
+    ))
+(global-idle-highlight-mode 1)
+
 (add-hook 'dired-load-hook
-          (lambda () (load "dired-x")))
+	  (lambda () (load "dired-x")))
 (autoload 'dired-jump "dired-x"
   "Jump to Dired buffer corresponding to current buffer." t)
 (autoload 'dired-jump-other-window "dired-x"
@@ -32,12 +42,12 @@
 ;; lua mode 2 spaces for an indent
 (setq lua-indent-level 2)
 (add-hook 'json-mode-hook
-          (lambda ()
-             (setq js-indent-level 2)))
+	  (lambda ()
+	     (setq js-indent-level 2)))
 
 ;; json-mode files for Starbound modding
 (add-to-list 'auto-mode-alist
-             '("Starbound.*\\.\\([^l]\\|l\\($\\|[^u]\\|u\\($\\|[^a]\\)\\)\\)" . json-mode))
+	     '("Starbound.*\\.\\([^l]\\|l\\($\\|[^u]\\|u\\($\\|[^a]\\)\\)\\)" . json-mode))
 
 (setq x-select-enable-clipboard t)
 
@@ -55,31 +65,15 @@
     (indent-tabs-mode . nil)))
 
 (add-hook 'protobuf-mode-hook
-          (lambda () (c-add-style "ramcloud-protobuf-style" ramcloud-protobuf-style t)))
+	  (lambda () (c-add-style "ramcloud-protobuf-style" ramcloud-protobuf-style t)))
 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
-;; Part of the Emacs Starter Kit
-;;
-;; This is the first thing to get loaded.
-;;
-
-;;; use groovy-mode when file ends in .groovy or .gradle or has #!/bin/groovy at
-;;; start
-(autoload 'groovy-mode "groovy-mode" "Major mode for editing Groovy code." t)
-(add-to-list 'auto-mode-alist '("\\.groovy\\'" . groovy-mode))
-(add-to-list 'auto-mode-alist '("\\.gradle\\'" . groovy-mode))
-(add-to-list 'interpreter-mode-alist '("groovy" . groovy-mode))
-;;; make Groovy mode electric by default.
-(add-hook 'groovy-mode-hook
-          '(lambda ()
-             (require 'groovy-electric)
-             (groovy-electric-mode)))
 
 (require 'java-mode-indent-annotations)
 (add-hook 'java-mode-hook
-          '(lambda ()
-             (java-mode-indent-annotations-setup)))
+	  '(lambda ()
+	     (java-mode-indent-annotations-setup)))
 
 (defun my-indent-setup ()
   (c-set-offset 'arglist-intro '++))
@@ -108,7 +102,7 @@
 (win-switch-authors-configuration)
 (setq win-switch-other-window-first
       (lambda ()
-          (null (nthcdr 3 (window-list)))))
+	  (null (nthcdr 3 (window-list)))))
 
 (add-to-list 'custom-theme-load-path "~/.emacs.d/emacs-color-theme-solarized")
 (load-theme 'solarized t)
@@ -131,12 +125,12 @@
 (setq explicit-shell-file-name "/bin/bash")
 (defun oleh-term-exec-hook ()
   (let* ((buff (current-buffer))
-         (proc (get-buffer-process buff)))
+	 (proc (get-buffer-process buff)))
     (set-process-sentinel
      proc
      `(lambda (process event)
-        (if (string= event "finished\n")
-            (kill-buffer ,buff))))))
+	(if (string= event "finished\n")
+	    (kill-buffer ,buff))))))
 
 (add-hook 'term-exec-hook 'oleh-term-exec-hook)
 
@@ -144,22 +138,22 @@
 (add-hook 'term-mode-hook 'shell-switcher-manually-register-shell)
 
 (add-hook 'c-mode-common-hook
-         (lambda ()
-           (when (derived-mode-p 'c-mode 'c++-mode)
-             (subword-mode 1))))
+	 (lambda ()
+	   (when (derived-mode-p 'c-mode 'c++-mode)
+	     (subword-mode 1))))
 
 (add-hook 'c-mode-common-hook
-         (lambda ()
-           (when (derived-mode-p 'c-mode 'c++-mode)
-             (flycheck-select-checker 'c/c++-gcc))))
+	 (lambda ()
+	   (when (derived-mode-p 'c-mode 'c++-mode)
+	     (flycheck-select-checker 'c/c++-gcc))))
 
 ;(add-hook 'c-mode-common-hook
 ;          (lambda ()
 ;            (when (derived-mode-p 'c-mode 'c++-mode)
 ;              (ggtags-mode 1))))
 
-;(require 'icicles)
-;(icy-mode 1)
+;; (require 'icicles)
+(icy-mode 1)
 
 ;; (add-to-list 'load-path "~/.emacs.d/site-lisp/magit/lisp")
 ;; (require 'magit)
@@ -178,19 +172,19 @@
   "Swap buffers between two windows"
   (interactive)
   (if (and swapping-window
-           swapping-buffer)
+	   swapping-buffer)
       (let ((this-buffer (current-buffer))
-            (this-window (selected-window)))
-        (if (and (window-live-p swapping-window)
-                 (buffer-live-p swapping-buffer))
-            (progn (switch-to-buffer swapping-buffer)
-                   (select-window swapping-window)
-                   (switch-to-buffer this-buffer)
-                   (select-window this-window)
-                   (message "Swapped buffers."))
-          (message "Old buffer/window killed.  Aborting."))
-        (setq swapping-buffer nil)
-        (setq swapping-window nil))
+	    (this-window (selected-window)))
+	(if (and (window-live-p swapping-window)
+		 (buffer-live-p swapping-buffer))
+	    (progn (switch-to-buffer swapping-buffer)
+		   (select-window swapping-window)
+		   (switch-to-buffer this-buffer)
+		   (select-window this-window)
+		   (message "Swapped buffers."))
+	  (message "Old buffer/window killed.  Aborting."))
+	(setq swapping-buffer nil)
+	(setq swapping-window nil))
     (progn
       (setq swapping-buffer (current-buffer))
       (setq swapping-window (selected-window))
@@ -200,6 +194,23 @@
 (add-hook 'after-init-hook #'global-flycheck-mode)
 (winner-mode 1)
 
+(defun rename-current-buffer-file ()
+  "Renames current buffer and file it is visiting."
+  (interactive)
+  (let ((name (buffer-name))
+	(filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+	(error "Buffer '%s' is not visiting a file!" name)
+      (let ((new-name (read-file-name "New name: " filename)))
+	(if (get-buffer new-name)
+	    (error "A buffer named '%s' already exists!" new-name)
+	  (rename-file filename new-name 1)
+	  (rename-buffer new-name)
+	  (set-visited-file-name new-name)
+	  (set-buffer-modified-p nil)
+	  (message "File '%s' successfully renamed to '%s'"
+		   name (file-name-nondirectory new-name)))))))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -208,8 +219,8 @@
  '(company-backends
    (quote
     (company-bbdb company-nxml company-css company-eclim company-semantic company-xcode company-cmake company-capf
-                  (company-dabbrev-code company-gtags company-etags company-keywords)
-                  company-oddmuse company-files company-dabbrev)))
+		  (company-dabbrev-code company-gtags company-etags company-keywords)
+		  company-oddmuse company-files company-dabbrev)))
  '(company-idle-delay 1)
  '(ecb-layout-name "left3")
  '(ecb-layout-window-sizes
@@ -233,9 +244,10 @@
     ("/home/william/rc/ramcloud/obj.transaction-slik/" "/home/william/rc/ramcloud/gtest/include/")))
  '(flycheck-gcc-language-standard "c++11")
  '(frame-background-mode (quote light))
+ '(icicle-find-file-expand-directory-flag t)
  '(package-selected-packages
    (quote
-    (actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch starter-kit shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
+    (idle-highlight-mode paredit groovy-mode actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
  '(shell-switcher-mode t)
  '(shell-switcher-new-shell-function (quote shell-switcher-make-eshell)))
 (custom-set-faces
