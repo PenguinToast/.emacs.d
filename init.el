@@ -13,6 +13,8 @@
 (require 'package)
 (add-to-list 'package-archives
 	     '("marmalade" . "http://marmalade-repo.org/packages/") t)
+(add-to-list 'package-archives
+	     '("elpy" . "http://jorgenschaefer.github.io/packages/"))
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
@@ -96,7 +98,7 @@
 (add-hook 'json-mode-hook 'fci-mode)
 
 (blink-cursor-mode 1)
-(set-face-attribute 'default nil :height 110)
+(set-face-attribute 'default nil :height 80)
 
 (require 'win-switch)
 (win-switch-authors-configuration)
@@ -122,7 +124,7 @@
       wg-mode-line-decor-divider ":")
 (workgroups-mode 1)
 
-(setq explicit-shell-file-name "/bin/bash")
+;; (setq explicit-shell-file-name "/bin/bash")
 (defun oleh-term-exec-hook ()
   (let* ((buff (current-buffer))
 	 (proc (get-buffer-process buff)))
@@ -194,6 +196,10 @@
 (add-hook 'after-init-hook #'global-flycheck-mode)
 (winner-mode 1)
 
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(elpy-enable)
+
 (defun rename-current-buffer-file ()
   "Renames current buffer and file it is visiting."
   (interactive)
@@ -234,20 +240,18 @@
    (quote
     (("~/rc/ramcloud/src" "ramcloud")
      ("~/rc/ramcloud/src/btreeRamCloud" "ramcloud_btree"))))
- '(ede-project-directories (quote ("/home/william/rc/ramcloud")))
- '(flycheck-c/c++-gcc-executable "gcc-4.9")
+ '(ede-project-directories (quote ("~/rc/ramcloud")))
  '(flycheck-checkers
    (quote
     (ada-gnat asciidoc c/c++-gcc c/c++-cppcheck cfengine chef-foodcritic coffee coffee-coffeelint coq css-csslint d-dmd emacs-lisp emacs-lisp-checkdoc erlang eruby-erubis fortran-gfortran go-gofmt go-golint go-vet go-build go-test go-errcheck haml handlebars haskell-ghc haskell-hlint html-tidy javascript-jshint javascript-eslint javascript-gjslint javascript-jscs javascript-standard json-jsonlint less luacheck lua perl perl-perlcritic php php-phpmd php-phpcs puppet-parser puppet-lint python-flake8 python-pylint python-pycompile r-lintr racket rpm-rpmlint rst rst-sphinx ruby-rubocop ruby-rubylint ruby ruby-jruby rust sass scala scala-scalastyle scss-lint scss sh-bash sh-posix-dash sh-posix-bash sh-zsh sh-shellcheck slim tex-chktex tex-lacheck texinfo verilog-verilator xml-xmlstarlet xml-xmllint yaml-jsyaml yaml-ruby)))
- '(flycheck-gcc-include-path
-   (quote
-    ("/home/william/rc/ramcloud/obj.transaction-slik/" "/home/william/rc/ramcloud/gtest/include/")))
  '(flycheck-gcc-language-standard "c++11")
  '(frame-background-mode (quote light))
+ '(icicle-buffer-include-recent-files-nflag 5)
  '(icicle-find-file-expand-directory-flag t)
  '(package-selected-packages
    (quote
     (idle-highlight-mode paredit groovy-mode actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
+ '(python-shell-interpreter "python3")
  '(shell-switcher-mode t)
  '(shell-switcher-new-shell-function (quote shell-switcher-make-eshell)))
 (custom-set-faces

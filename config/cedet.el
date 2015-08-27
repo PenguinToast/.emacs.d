@@ -10,13 +10,13 @@
 
 ;; (setq cedet-root-path
       ;; (file-name-as-directory (expand-file-name
-                               ;; "~/.emacs.d/site-lisp/cedet/")))
+			       ;; "~/.emacs.d/site-lisp/cedet/")))
 
 ;; (load-file (concat cedet-root-path "cedet-devel-load.el"))
 ;; (load-file (concat cedet-root-path "contrib/cedet-contrib-load.el"))
 
 ;; (add-to-list 'Info-directory-list
-                     ;; "~/.emacs.d/site-lisp/cedet/doc/info")
+		     ;; "~/.emacs.d/site-lisp/cedet/doc/info")
 
 ;; Take 2
 (load-file "~/.emacs.d/site-lisp/cedet/cedet-devel-load.el")
@@ -31,7 +31,9 @@
 (add-to-list 'semantic-default-submodes 'global-semantic-highlight-func-mode)
 
 ;; Activate semantic
-(semantic-mode 1)
+;; (semantic-mode 1)
+(add-hook 'c-mode-hook '(lambda ()
+	(semantic-mode t)))
 
 ;; (require 'semantic/bovine/c)
 ;; (require 'semantic/bovine/gcc)
