@@ -98,7 +98,7 @@
 (add-hook 'json-mode-hook 'fci-mode)
 
 (blink-cursor-mode 1)
-(set-face-attribute 'default nil :height 80)
+(set-face-attribute 'default nil :height 110)
 
 (require 'win-switch)
 (win-switch-authors-configuration)
