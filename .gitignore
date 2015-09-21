@@ -13,3 +13,4 @@
 /.emacs_workgroups
 /.smex-items
 *~
+*.pyc
