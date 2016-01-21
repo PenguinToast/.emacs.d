@@ -38,6 +38,13 @@
 (define-key global-map "\C-x\C-j" 'dired-jump)
 (define-key global-map "\C-x4\C-j" 'dired-jump-other-window)
 
+;; Eclim setup
+(require 'eclim)
+(add-hook 'after-init-hook 'global-eclim-mode)
+(require 'eclimd)
+(require 'company-emacs-eclim)
+(company-emacs-eclim-setup)
+
 (add-hook 'after-init-hook 'global-company-mode)
 (global-set-key (kbd "M-/") 'company-complete)
 
@@ -262,6 +269,8 @@
    (quote
     (("~/rc/ramcloud/src" "ramcloud")
      ("~/rc/ramcloud/src/btreeRamCloud" "ramcloud_btree"))))
+ '(eclim-eclipse-dirs (quote ("/home/william/util/eclipse")))
+ '(eclim-executable "/home/william/util/eclipse/eclim")
  '(ede-project-directories (quote ("~/rc/ramcloud")))
  '(fci-rule-color "#eee8d5")
  '(flycheck-checkers
@@ -293,14 +302,13 @@
    (quote
     ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
  '(icicle-buffer-include-recent-files-nflag 5)
- '(icicle-find-file-expand-directory-flag t)
  '(magit-diff-use-overlays nil)
  '(nrepl-message-colors
    (quote
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (seq geiser highlight-parentheses solarized-theme elpy facemenu+ floobits idle-highlight-mode paredit groovy-mode actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
+    (emacs-eclim seq geiser highlight-parentheses solarized-theme elpy facemenu+ floobits idle-highlight-mode paredit groovy-mode actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(python-shell-interpreter "python3")
