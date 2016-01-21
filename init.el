@@ -249,6 +249,7 @@
 		  company-oddmuse company-files company-dabbrev)))
  '(company-idle-delay 1)
  '(compilation-message-face (quote default))
+ '(confirm-kill-emacs (quote y-or-n-p))
  '(cua-global-mark-cursor-color "#2aa198")
  '(cua-normal-cursor-color "#657b83")
  '(cua-overwrite-cursor-color "#b58900")
