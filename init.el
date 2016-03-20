@@ -1,7 +1,9 @@
 ;; (setq stack-trace-on-error t)
 
+;;; Code:
 (add-to-list 'load-path "~/.emacs.d/lisp")
-(load-file "~/.emacs.d/config/cedet.el")
+
+; (load-file "~/.emacs.d/config/cedet.el")
 (add-to-list 'load-path (expand-file-name
       "~/.emacs.d/site-lisp/ecb/"))
 (require 'ecb)
@@ -17,6 +19,9 @@
 	     '("elpy" . "http://jorgenschaefer.github.io/packages/"))
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
+
+(require 'load-directory)
+(load-directory "~/.emacs.d/config")
 
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
@@ -41,6 +46,7 @@
 ;; Eclim setup
 (require 'eclim)
 (add-hook 'after-init-hook 'global-eclim-mode)
+(global-set-key (kbd "C-S-o") 'eclim-java-import-organize)
 (require 'eclimd)
 (require 'company-emacs-eclim)
 (company-emacs-eclim-setup)
@@ -84,6 +90,21 @@
 	  '(lambda ()
 	     (java-mode-indent-annotations-setup)))
 
+;; LaTeX setup
+(defun my-latex-setup ()
+  (setq-local fill-column 115))
+
+(setq TeX-auto-save t)
+(setq TeX-parse-self t)
+(setq-default TeX-master nil)
+(add-hook 'LaTeX-mode-hook 'visual-line-mode)
+(add-hook 'LaTeX-mode-hook 'flyspell-mode)
+(add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+(add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
+(add-hook 'LaTeX-mode-hook 'my-latex-setup)
+(setq reftex-plug-into-AUCTeX t)
+
 (defun my-indent-setup ()
   (c-set-offset 'arglist-intro '++))
 (add-hook 'java-mode-hook 'my-indent-setup)
@@ -98,6 +119,7 @@
 (require 'revbufs)
 (setq-default fill-column 80)
 (require 'fill-column-indicator)
+(setq column-number-mode t)
 (add-hook 'c-mode-hook 'fci-mode)
 (add-hook 'c-mode-common-hook 'fci-mode)
 (add-hook 'java-mode-hook 'fci-mode)
@@ -160,17 +182,24 @@
 ;            (when (derived-mode-p 'c-mode 'c++-mode)
 ;              (ggtags-mode 1))))
 
-;; (require 'icicles)
 (icy-mode 1)
+;; TODO: Still doesn't work
+(defun icicles-rebind-hook ()
+  (define-key icicle-mode-map (kbd "C-c `") nil))
+(add-hook 'icy-mode-hook 'icicles-rebind-hook)
 
-;; (add-to-list 'load-path "~/.emacs.d/site-lisp/magit/lisp")
-;; (require 'magit)
-
-;; (with-eval-after-load 'info
- ;; (info-initialize)
- ;; (add-to-list 'Info-directory-list
-	       ;; "~/.emacs.d/lib/magit/Documentation/"))
 (global-set-key (kbd "C-x g") 'magit-status)
+
+;; Ruby Stuff
+(add-hook 'enh-ruby-mode-hook 'robe-mode)
+(eval-after-load 'company
+  '(push 'company-robe company-backends))
+(defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate)
+  (rvm-activate-corresponding-ruby))
+(require 'highlight-indentation)
+(add-hook 'enh-ruby-mode-hook
+	  (lambda () (highlight-indentation-current-column-mode)))
+
 
 ;; (add-hook 'before-save-hook 'whitespace-cleanup)
 
@@ -309,7 +338,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (emacs-eclim seq geiser highlight-parentheses solarized-theme elpy facemenu+ floobits idle-highlight-mode paredit groovy-mode actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
+    (smartparens enh-ruby-mode highlight-indent-guides robe rvm auctex emacs-eclim seq geiser highlight-parentheses solarized-theme elpy facemenu+ floobits idle-highlight-mode paredit groovy-mode actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(python-shell-interpreter "python3")
