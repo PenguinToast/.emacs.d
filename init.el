@@ -1,16 +1,11 @@
-;; (setq stack-trace-on-error t)
+;;; init.el --- Main Emacs init file
+;;; Commentary:
 
 ;;; Code:
+;; (setq stack-trace-on-error t)
 (add-to-list 'load-path "~/.emacs.d/lisp")
-
-; (load-file "~/.emacs.d/config/cedet.el")
-(add-to-list 'load-path (expand-file-name
-      "~/.emacs.d/site-lisp/ecb/"))
-(require 'ecb)
-(setq ecb-tip-of-the-day nil)
-
-(delete-selection-mode 1)
-;(add-hook 'lua-mode-hook 'ggtags-mode)
+(add-to-list 'load-path "~/.emacs.d/site-lisp")
+(load-library "cedet-config")
 
 (require 'package)
 (add-to-list 'package-archives
@@ -20,17 +15,15 @@
 (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (package-initialize)
 
-(require 'load-directory)
-(load-directory "~/.emacs.d/config")
-
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-message t)
 (menu-bar-mode 0)
-(tool-bar-mode -1)
-(define-global-minor-mode global-idle-highlight-mode ;;the name of the new global mode
-  idle-highlight-mode ;;the name of the minor mode you want to turn on
-  (lambda () (idle-highlight-mode t) ;;the function to turn on the mode
-    ))
+(tool-bar-mode 0)
+(delete-selection-mode 1)
+
+(define-global-minor-mode global-idle-highlight-mode
+  idle-highlight-mode
+  (lambda () (idle-highlight-mode t)))
 (global-idle-highlight-mode 1)
 
 (add-hook 'dired-load-hook
@@ -43,52 +36,19 @@
 (define-key global-map "\C-x\C-j" 'dired-jump)
 (define-key global-map "\C-x4\C-j" 'dired-jump-other-window)
 
-;; Eclim setup
-(require 'eclim)
-(add-hook 'after-init-hook 'global-eclim-mode)
-(global-set-key (kbd "C-S-o") 'eclim-java-import-organize)
-(require 'eclimd)
-(require 'company-emacs-eclim)
-(company-emacs-eclim-setup)
-
 (add-hook 'after-init-hook 'global-company-mode)
 (global-set-key (kbd "M-/") 'company-complete)
-
-;; lua mode 2 spaces for an indent
-(setq lua-indent-level 2)
-(add-hook 'json-mode-hook
-	  (lambda ()
-	     (setq js-indent-level 2)))
-
-;; json-mode files for Starbound modding
-(add-to-list 'auto-mode-alist
-	     '("Starbound.*\\.\\([^l]\\|l\\($\\|[^u]\\|u\\($\\|[^a]\\)\\)\\)" . json-mode))
 
 (setq x-select-enable-clipboard t)
 
 ;; basic mouse stuff
 (xterm-mouse-mode 1)
 
-(add-to-list 'load-path "~/.emacs.d/ramcloud/")
-(load "ramcloud-c-style")
-(add-hook 'c-mode-common-hook 'ramcloud-set-c-style)
-(add-hook 'c-mode-common-hook 'ramcloud-make-newline-indent)
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-
-(defconst ramcloud-protobuf-style
-  '((c-basic-offset . 2)
-    (indent-tabs-mode . nil)))
-
-(add-hook 'protobuf-mode-hook
-	  (lambda () (c-add-style "ramcloud-protobuf-style" ramcloud-protobuf-style t)))
-
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 
-(require 'java-mode-indent-annotations)
-(add-hook 'java-mode-hook
-	  '(lambda ()
-	     (java-mode-indent-annotations-setup)))
+(require 'load-directory)
+(load-directory "~/.emacs.d/config")
 
 ;; LaTeX setup
 (defun my-latex-setup ()
@@ -104,17 +64,6 @@
 (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
 (add-hook 'LaTeX-mode-hook 'my-latex-setup)
 (setq reftex-plug-into-AUCTeX t)
-
-(defun my-indent-setup ()
-  (c-set-offset 'arglist-intro '++))
-(add-hook 'java-mode-hook 'my-indent-setup)
-
-(defadvice kill-region (before unix-werase activate compile)
-  "When called interactively with no active region, delete a single word
-    backwards instead."
-  (interactive
-   (if mark-active (list (region-beginning) (region-end))
-     (list (save-excursion (backward-word 1) (point)) (point)))))
 
 (require 'revbufs)
 (setq-default fill-column 80)
@@ -167,21 +116,6 @@
 (add-hook 'eshell-mode-hook 'shell-switcher-manually-register-shell)
 (add-hook 'term-mode-hook 'shell-switcher-manually-register-shell)
 
-(add-hook 'c-mode-common-hook
-	 (lambda ()
-	   (when (derived-mode-p 'c-mode 'c++-mode)
-	     (subword-mode 1))))
-
-(add-hook 'c-mode-common-hook
-	 (lambda ()
-	   (when (derived-mode-p 'c-mode 'c++-mode)
-	     (flycheck-select-checker 'c/c++-gcc))))
-
-;(add-hook 'c-mode-common-hook
-;          (lambda ()
-;            (when (derived-mode-p 'c-mode 'c++-mode)
-;              (ggtags-mode 1))))
-
 (icy-mode 1)
 ;; TODO: Still doesn't work
 (defun icicles-rebind-hook ()
@@ -200,34 +134,6 @@
 (add-hook 'enh-ruby-mode-hook
 	  (lambda () (highlight-indentation-current-column-mode)))
 
-
-;; (add-hook 'before-save-hook 'whitespace-cleanup)
-
-(setq swapping-buffer nil)
-(setq swapping-window nil)
-(defun swap-buffers-in-windows ()
-  "Swap buffers between two windows"
-  (interactive)
-  (if (and swapping-window
-	   swapping-buffer)
-      (let ((this-buffer (current-buffer))
-	    (this-window (selected-window)))
-	(if (and (window-live-p swapping-window)
-		 (buffer-live-p swapping-buffer))
-	    (progn (switch-to-buffer swapping-buffer)
-		   (select-window swapping-window)
-		   (switch-to-buffer this-buffer)
-		   (select-window this-window)
-		   (message "Swapped buffers."))
-	  (message "Old buffer/window killed.  Aborting."))
-	(setq swapping-buffer nil)
-	(setq swapping-window nil))
-    (progn
-      (setq swapping-buffer (current-buffer))
-      (setq swapping-window (selected-window))
-      (message "Buffer and window marked for swapping."))))
-(global-set-key (kbd "C-x p") 'swap-buffers-in-windows)
-
 (add-hook 'after-init-hook #'global-flycheck-mode)
 (winner-mode 1)
 
@@ -235,34 +141,17 @@
 (setq recentf-max-menu-items 25)
 (elpy-enable)
 
-(defun rename-current-buffer-file ()
-  "Renames current buffer and file it is visiting."
-  (interactive)
-  (let ((name (buffer-name))
-	(filename (buffer-file-name)))
-    (if (not (and filename (file-exists-p filename)))
-	(error "Buffer '%s' is not visiting a file!" name)
-      (let ((new-name (read-file-name "New name: " filename)))
-	(if (get-buffer new-name)
-	    (error "A buffer named '%s' already exists!" new-name)
-	  (rename-file filename new-name 1)
-	  (rename-buffer new-name)
-	  (set-visited-file-name new-name)
-	  (set-buffer-modified-p nil)
-	  (message "File '%s' successfully renamed to '%s'"
-		   name (file-name-nondirectory new-name)))))))
-
 (setq backup-directory-alist
       `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms
       `((".*" ,temporary-file-directory t)))
 
-(show-paren-mode 1)
-(define-globalized-minor-mode global-highlight-parentheses-mode
-  highlight-parentheses-mode
-  (lambda ()
-    (highlight-parentheses-mode t)))
-(global-highlight-parentheses-mode t)
+; (show-paren-mode 1)
+; (define-globalized-minor-mode global-highlight-parentheses-mode
+;  highlight-parentheses-mode
+;  (lambda ()
+;    (highlight-parentheses-mode t)))
+; (global-highlight-parentheses-mode t)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -338,7 +227,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (smartparens enh-ruby-mode highlight-indent-guides robe rvm auctex emacs-eclim seq geiser highlight-parentheses solarized-theme elpy facemenu+ floobits idle-highlight-mode paredit groovy-mode actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
+    (malabar-mode inf-groovy groovy-mode smartparens enh-ruby-mode highlight-indent-guides robe rvm auctex emacs-eclim seq geiser highlight-parentheses solarized-theme elpy facemenu+ floobits idle-highlight-mode paredit actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(python-shell-interpreter "python3")

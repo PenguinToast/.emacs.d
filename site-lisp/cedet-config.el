@@ -1,4 +1,5 @@
-;;; minimial-cedet-config.el --- Working configuration for CEDET from bzr
+;;; cedet-config --- Configuration for CEDET and ECB
+;;; Commentary:
 
 ;; Copyright (C) Alex Ott
 ;;
@@ -8,17 +9,7 @@
 
 ;; Do checkout of fresh CEDET, and use this config (don't forget to change path below)
 
-;; (setq cedet-root-path
-      ;; (file-name-as-directory (expand-file-name
-			       ;; "~/.emacs.d/site-lisp/cedet/")))
-
-;; (load-file (concat cedet-root-path "cedet-devel-load.el"))
-;; (load-file (concat cedet-root-path "contrib/cedet-contrib-load.el"))
-
-;; (add-to-list 'Info-directory-list
-		     ;; "~/.emacs.d/site-lisp/cedet/doc/info")
-
-;; Take 2
+;;; Code:
 (load-file "~/.emacs.d/site-lisp/cedet/cedet-devel-load.el")
 
 ;; select which submodes we want to activate
@@ -34,11 +25,6 @@
 ;; (semantic-mode 1)
 (add-hook 'c-mode-hook '(lambda ()
 	(semantic-mode t)))
-
-;; (require 'semantic/bovine/c)
-;; (require 'semantic/bovine/gcc)
-
-;; (require 'cedet-files)
 
 ;; load contrib library
 (load-file "~/.emacs.d/site-lisp/cedet/contrib/cedet-contrib-load.el")
@@ -66,21 +52,13 @@
   )
 (add-hook 'c-mode-common-hook 'alexott/c-mode-cedet-hook)
 
-;; (when (cedet-gnu-global-version-check t)
-  ;; (semanticdb-enable-gnu-global-databases 'c-mode t)
-  ;; (semanticdb-enable-gnu-global-databases 'c++-mode t))
-
-;; (when (cedet-ectag-version-check t)
-  ;; (semantic-load-enable-primary-ectags-support))
-
-;; SRecode
-;; (global-srecode-minor-mode 1)
-
 ;; EDE
 (global-ede-mode 1)
 ;; (ede-enable-generic-projects)
 
-;; Setup JAVA....
-;; (require 'cedet-java)
+(add-to-list 'load-path (expand-file-name
+      "~/.emacs.d/site-lisp/ecb/"))
+(require 'ecb)
+(setq ecb-tip-of-the-day nil)
 
-;;; minimial-cedet-config.el ends here
+;;; cedet-config.el ends here
