@@ -7,8 +7,8 @@
      (list (save-excursion (backward-word 1) (point)) (point)))))
 
 
-(setq swapping-buffer nil)
-(setq swapping-window nil)
+(defvar swapping-buffer nil)
+(defvar swapping-window nil)
 (defun swap-buffers-in-windows ()
   "Swap buffers between two windows"
   (interactive)
@@ -32,6 +32,15 @@
       (message "Buffer and window marked for swapping."))))
 (global-set-key (kbd "C-x p") 'swap-buffers-in-windows)
 
+(defun move-buffer-to-largest-window ()
+  "Move current buffer to largest window."
+  (interactive)
+  (setq swapping-buffer (current-buffer))
+  (setq swapping-window (selected-window))
+  (select-window (get-largest-window))
+  (swap-buffers-in-windows))
+(global-set-key (kbd "C-x c") 'move-buffer-to-largest-window)
+
 (defun rename-current-buffer-file ()
   "Renames current buffer and file it is visiting."
   (interactive)
@@ -48,3 +57,15 @@
 	  (set-buffer-modified-p nil)
 	  (message "File '%s' successfully renamed to '%s'"
 		   name (file-name-nondirectory new-name)))))))
+
+(defun sudo-edit (&optional arg)
+  "Edit currently visited file as root.
+
+With a prefix ARG prompt for a file to visit.
+Will also prompt for a file to visit if current
+buffer is not visiting a file."
+  (interactive "P")
+  (if (or arg (not buffer-file-name))
+      (find-file (concat "/sudo:root@localhost:"
+                         (ido-read-file-name "Find file(as root): ")))
+    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))

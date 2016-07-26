@@ -7,3 +7,6 @@
 [submodule "site-lisp/ecb"]
 	path = site-lisp/ecb
 	url = git@github.com:alexott/ecb.git
+[submodule "site-lisp/yaml-mode"]
+	path = site-lisp/yaml-mode
+	url = git@github.com:yoshiki/yaml-mode.git

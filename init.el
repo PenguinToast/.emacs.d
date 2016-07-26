@@ -4,8 +4,7 @@
 ;;; Code:
 ;; (setq stack-trace-on-error t)
 (add-to-list 'load-path "~/.emacs.d/lisp")
-(add-to-list 'load-path "~/.emacs.d/site-lisp")
-(load-library "cedet-config")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/yaml-mode")
 
 (require 'package)
 (add-to-list 'package-archives
@@ -20,6 +19,8 @@
 (menu-bar-mode 0)
 (tool-bar-mode 0)
 (delete-selection-mode 1)
+
+(projectile-global-mode)
 
 (define-global-minor-mode global-idle-highlight-mode
   idle-highlight-mode
@@ -46,6 +47,8 @@
 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
+
+(global-flycheck-mode)
 
 (require 'load-directory)
 (load-directory "~/.emacs.d/config")
@@ -75,6 +78,8 @@
 (add-hook 'lua-mode-hook 'fci-mode)
 (add-hook 'json-mode-hook 'fci-mode)
 
+(setq-default indent-tabs-mode nil)
+
 (blink-cursor-mode 1)
 (if (eq system-type 'cygwin)
     (set-face-attribute 'default nil :height 80)
@@ -101,6 +106,8 @@
       wg-mode-line-decor-divider ":")
 (workgroups-mode 1)
 
+(setq ag-highlight-search t)
+
 ;; (setq explicit-shell-file-name "/bin/bash")
 (defun oleh-term-exec-hook ()
   (let* ((buff (current-buffer))
@@ -124,18 +131,15 @@
 
 (global-set-key (kbd "C-x g") 'magit-status)
 
-;; Ruby Stuff
-(add-hook 'enh-ruby-mode-hook 'robe-mode)
-(eval-after-load 'company
-  '(push 'company-robe company-backends))
-(defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate)
-  (rvm-activate-corresponding-ruby))
-(require 'highlight-indentation)
-(add-hook 'enh-ruby-mode-hook
-	  (lambda () (highlight-indentation-current-column-mode)))
-
-(add-hook 'after-init-hook #'global-flycheck-mode)
+;; (add-hook 'after-init-hook #'global-flycheck-mode)
 (winner-mode 1)
+
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+
+(add-hook 'yaml-mode-hook
+	  '(lambda ()
+	     (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
 
 (recentf-mode 1)
 (setq recentf-max-menu-items 25)
@@ -146,12 +150,13 @@
 (setq auto-save-file-name-transforms
       `((".*" ,temporary-file-directory t)))
 
-; (show-paren-mode 1)
-; (define-globalized-minor-mode global-highlight-parentheses-mode
-;  highlight-parentheses-mode
-;  (lambda ()
-;    (highlight-parentheses-mode t)))
-; (global-highlight-parentheses-mode t)
+(when (eq system-type 'darwin) ;; mac specific settings
+  (setq mac-option-modifier 'meta)
+  (setq mac-command-modifier 'meta)
+  (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
+  (setq ns-function-modifier 'hyper)
+  (exec-path-from-shell-initialize)
+  )
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -160,11 +165,6 @@
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#eee8d5" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#839496"])
- '(company-backends
-   (quote
-    (company-bbdb company-nxml company-css company-eclim company-semantic company-xcode company-cmake company-capf
-		  (company-dabbrev-code company-gtags company-etags company-keywords)
-		  company-oddmuse company-files company-dabbrev)))
  '(company-idle-delay 1)
  '(compilation-message-face (quote default))
  '(confirm-kill-emacs (quote y-or-n-p))
@@ -176,25 +176,10 @@
  '(custom-safe-themes
    (quote
     ("a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
- '(ecb-layout-name "left3")
- '(ecb-layout-window-sizes
-   (quote
-    (("left3"
-      (ecb-directories-buffer-name 0.20165745856353592 . 0.29)
-      (ecb-sources-buffer-name 0.20165745856353592 . 0.35)
-      (ecb-methods-buffer-name 0.20165745856353592 . 0.35)))))
- '(ecb-options-version "2.40")
- '(ecb-source-path
-   (quote
-    (("~/rc/ramcloud/src" "ramcloud")
-     ("~/rc/ramcloud/src/btreeRamCloud" "ramcloud_btree"))))
  '(eclim-eclipse-dirs (quote ("/home/william/util/eclipse")))
  '(eclim-executable "/home/william/util/eclipse/eclim")
  '(ede-project-directories (quote ("~/rc/ramcloud")))
- '(fci-rule-color "#eee8d5")
- '(flycheck-checkers
-   (quote
-    (ada-gnat asciidoc c/c++-gcc c/c++-cppcheck cfengine chef-foodcritic coffee coffee-coffeelint coq css-csslint d-dmd emacs-lisp emacs-lisp-checkdoc erlang eruby-erubis fortran-gfortran go-gofmt go-golint go-vet go-build go-test go-errcheck haml handlebars haskell-ghc haskell-hlint html-tidy javascript-jshint javascript-eslint javascript-gjslint javascript-jscs javascript-standard json-jsonlint less luacheck lua perl perl-perlcritic php php-phpmd php-phpcs puppet-parser puppet-lint python-flake8 python-pylint python-pycompile r-lintr racket rpm-rpmlint rst rst-sphinx ruby-rubocop ruby-rubylint ruby ruby-jruby rust sass scala scala-scalastyle scss-lint scss sh-bash sh-posix-dash sh-posix-bash sh-zsh sh-shellcheck slim tex-chktex tex-lacheck texinfo verilog-verilator xml-xmlstarlet xml-xmllint yaml-jsyaml yaml-ruby)))
+ '(fci-rule-color "windowFrameColor")
  '(flycheck-gcc-language-standard "c++11")
  '(frame-background-mode (quote light))
  '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
@@ -227,7 +212,7 @@
     ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (malabar-mode inf-groovy groovy-mode smartparens enh-ruby-mode highlight-indent-guides robe rvm auctex emacs-eclim seq geiser highlight-parentheses solarized-theme elpy facemenu+ floobits idle-highlight-mode paredit actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode json-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
+    (wgrep wgrep-ag elpy json-mode hydra use-package exec-path-from-shell web-mode ag js2-mode haml-mode column-marker stylus-mode sws-mode fuzzy-match projectile malabar-mode inf-groovy groovy-mode smartparens highlight-indent-guides robe rvm auctex emacs-eclim seq geiser highlight-parentheses solarized-theme facemenu+ floobits idle-highlight-mode paredit actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(python-shell-interpreter "python3")
