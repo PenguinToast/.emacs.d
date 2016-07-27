@@ -1,260 +1,370 @@
 ;;; init.el --- Main Emacs init file
 ;;; Commentary:
+;; Some commentary
 
 ;;; Code:
-;; (setq stack-trace-on-error t)
-(add-to-list 'load-path "~/.emacs.d/lisp")
-(add-to-list 'load-path "~/.emacs.d/site-lisp/yaml-mode")
-
+;; `package' initialization
 (require 'package)
 (add-to-list 'package-archives
-	     '("marmalade" . "http://marmalade-repo.org/packages/") t)
-(add-to-list 'package-archives
 	     '("elpy" . "http://jorgenschaefer.github.io/packages/"))
-(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
+(add-to-list 'package-archives
+	     '("marmalade" . "http://marmalade-repo.org/packages/"))
+
 (package-initialize)
 
-(setq inhibit-splash-screen t)
-(setq inhibit-startup-message t)
-(menu-bar-mode 0)
-(tool-bar-mode 0)
-(delete-selection-mode 1)
+; Bootstrap `use-package'
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
-(projectile-global-mode)
+;; Packages:
+;; Custom Before:
+(use-package misc-config
+  :load-path "lisp/")
 
-(define-global-minor-mode global-idle-highlight-mode
-  idle-highlight-mode
-  (lambda () (idle-highlight-mode t)))
-(global-idle-highlight-mode 1)
+(use-package mac-config
+  :if (eq system-type 'darwin)
+  :load-path "lisp/")
 
-(add-hook 'dired-load-hook
-	  (lambda () (load "dired-x")))
-(autoload 'dired-jump "dired-x"
-  "Jump to Dired buffer corresponding to current buffer." t)
-(autoload 'dired-jump-other-window "dired-x"
-  "Like \\[dired-jump] (dired-jump) but in other window." t)
+(use-package my-functions
+  :load-path "lisp/")
 
-(define-key global-map "\C-x\C-j" 'dired-jump)
-(define-key global-map "\C-x4\C-j" 'dired-jump-other-window)
+;; site-lisp:
+(use-package revbufs
+  :load-path "site-lisp/")
 
-(add-hook 'after-init-hook 'global-company-mode)
-(global-set-key (kbd "M-/") 'company-complete)
+;; Themes:
 
-(setq x-select-enable-clipboard t)
+(use-package solarized-theme
+  :ensure t)
 
-;; basic mouse stuff
-(xterm-mouse-mode 1)
+;; This one was causing problems.
+(use-package twilight-bright-theme
+  :disabled
+  :ensure t)
 
-;;; turn on syntax highlighting
-(global-font-lock-mode 1)
+(use-package color-theme-sanityinc-tomorrow
+  :disabled
+  :ensure t)
 
-(global-flycheck-mode)
+(use-package leuven-theme
+  :disabled
+  :ensure t)
 
-(require 'load-directory)
-(load-directory "~/.emacs.d/config")
+(use-package hemisu-theme
+  :disabled
+  :ensure t)
 
-;; LaTeX setup
-(defun my-latex-setup ()
-  (setq-local fill-column 115))
+(use-package material-theme
+  :disabled
+  :ensure t)
 
-(setq TeX-auto-save t)
-(setq TeX-parse-self t)
-(setq-default TeX-master nil)
-(add-hook 'LaTeX-mode-hook 'visual-line-mode)
-(add-hook 'LaTeX-mode-hook 'flyspell-mode)
-(add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-(add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
-(add-hook 'LaTeX-mode-hook 'my-latex-setup)
-(setq reftex-plug-into-AUCTeX t)
+;; General:
 
-(require 'revbufs)
-(setq-default fill-column 80)
-(require 'fill-column-indicator)
-(setq column-number-mode t)
-(add-hook 'c-mode-hook 'fci-mode)
-(add-hook 'c-mode-common-hook 'fci-mode)
-(add-hook 'java-mode-hook 'fci-mode)
-(add-hook 'lua-mode-hook 'fci-mode)
-(add-hook 'json-mode-hook 'fci-mode)
+(use-package exec-path-from-shell
+  :ensure t
+  :config (exec-path-from-shell-initialize))
 
-(setq-default indent-tabs-mode nil)
+(use-package idle-highlight-mode
+  :ensure t
+  :config
+  (define-global-minor-mode global-idle-highlight-mode
+    idle-highlight-mode
+    (lambda () (idle-highlight-mode t)))
+  (global-idle-highlight-mode 1))
 
-(blink-cursor-mode 1)
-(if (eq system-type 'cygwin)
-    (set-face-attribute 'default nil :height 80)
-    (set-face-attribute 'default nil :height 110))
+(use-package seq
+  :ensure t)
 
-(require 'win-switch)
-(win-switch-authors-configuration)
-(setq win-switch-other-window-first
-      (lambda ()
-	  (null (nthcdr 3 (window-list)))))
-
-;; Workgroups2
-(require 'workgroups2)
-;; Change some settings
-(setq wg-prefix-key (kbd "C-z"))
-(setq wg-session-file "~/.emacs.d/.emacs_workgroups")
-;; What to do on Emacs exit / workgroups-mode exit?
-(setq wg-emacs-exit-save-behavior           'save)      ; Options: 'save 'ask nil
-(setq wg-workgroups-mode-exit-save-behavior 'save)      ; Options: 'save 'ask nil
-(setq wg-mode-line-display-on t)          ; Default: (not (featurep 'powerline))
-(setq wg-flag-modified t)                 ; Display modified flags as well
-(setq wg-mode-line-decor-left-brace "["
-      wg-mode-line-decor-right-brace "]"  ; how to surround it
-      wg-mode-line-decor-divider ":")
-(workgroups-mode 1)
-
-(setq ag-highlight-search t)
-
-;; (setq explicit-shell-file-name "/bin/bash")
-(defun oleh-term-exec-hook ()
-  (let* ((buff (current-buffer))
-	 (proc (get-buffer-process buff)))
-    (set-process-sentinel
-     proc
-     `(lambda (process event)
-	(if (string= event "finished\n")
-	    (kill-buffer ,buff))))))
-
-(add-hook 'term-exec-hook 'oleh-term-exec-hook)
-
-(add-hook 'eshell-mode-hook 'shell-switcher-manually-register-shell)
-(add-hook 'term-mode-hook 'shell-switcher-manually-register-shell)
-
-(icy-mode 1)
-;; TODO: Still doesn't work
-(defun icicles-rebind-hook ()
-  (define-key icicle-mode-map (kbd "C-c `") nil))
-(add-hook 'icy-mode-hook 'icicles-rebind-hook)
-
-(global-set-key (kbd "C-x g") 'magit-status)
-
-;; (add-hook 'after-init-hook #'global-flycheck-mode)
-(winner-mode 1)
-
-(require 'yaml-mode)
-(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
-
-(add-hook 'yaml-mode-hook
-	  '(lambda ()
-	     (define-key yaml-mode-map "\C-m" 'newline-and-indent)))
-
-(recentf-mode 1)
-(setq recentf-max-menu-items 25)
-(elpy-enable)
-
-(setq backup-directory-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
-
-(when (eq system-type 'darwin) ;; mac specific settings
-  (setq mac-option-modifier 'meta)
-  (setq mac-command-modifier 'meta)
-  (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
-  (setq ns-function-modifier 'hyper)
-  (exec-path-from-shell-initialize)
+(use-package company
+  :ensure t
+  :config (global-company-mode)
+  :bind ("M-/" . company-complete)
   )
 
+(use-package projectile
+  :ensure t
+  :config (projectile-global-mode))
+
+(use-package fuzzy-match
+  :ensure t)
+
+(use-package icicles
+  :ensure t
+  :config
+  (icy-mode 1))
+
+(use-package win-switch
+  :ensure t
+  :config
+  (win-switch-authors-configuration)
+  (setq win-switch-other-window-first
+        (lambda ()
+          (null (nthcdr 3 (window-list))))))
+
+(use-package workgroups2
+  :ensure t
+  :config
+  (setq wg-prefix-key (kbd "C-z"))
+  (setq wg-session-file "~/.emacs.d/.emacs_workgroups")
+  (setq wg-emacs-exit-save-behavior 'save)
+  (setq wg-workgroups-mode-exit-save-behavior 'save)
+  (setq wg-mode-line-display-on t)
+  (setq wg-flag-modified t)
+  (setq wg-mode-line-decor-left-brace "["
+        wg-mode-line-decor-right-brace "]"  ; how to surround it
+        wg-mode-line-decor-divider ":")
+  (workgroups-mode 1)
+  )
+
+(use-package flycheck
+  :ensure t
+  :config (global-flycheck-mode))
+
+(use-package magit
+  :ensure t
+  :bind ("C-x g" . magit-status))
+
+(use-package magit-gh-pulls
+  :ensure t
+  :config
+  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+
+(use-package hydra
+  :ensure t)
+
+(use-package smartparens
+  :ensure t
+  :init
+  (defhydra smartparens-hydra ()
+    "Smartparens"
+    ("d" sp-down-sexp "Down")
+    ("e" sp-up-sexp "Up")
+    ("u" sp-backward-up-sexp "Up")
+    ("a" sp-backward-down-sexp "Down")
+    ("f" sp-forward-sexp "Forward")
+    ("b" sp-backward-sexp "Backward")
+    ("k" sp-kill-sexp "Kill" :color blue)
+    ("q" nil "Quit" :color blue))
+  :bind
+  (:map smartparens-mode-map
+        ("C-M-f" . sp-forward-sexp)
+        ("C-M-b" . sp-backward-sexp)
+
+        ("C-M-d" . sp-down-sexp)
+        ("C-M-a" . sp-backward-down-sexp)
+        ("C-S-d" . sp-beginning-of-sexp)
+        ("C-S-a" . sp-end-of-sexp)
+
+        ("C-M-e" . sp-up-sexp)
+        ("C-M-u" . sp-backward-up-sexp)
+        ("C-M-t" . sp-transpose-sexp)
+
+        ("C-M-n" . sp-next-sexp)
+        ("C-M-p" . sp-previous-sexp)
+
+        ("C-M-k" . sp-kill-sexp)
+        ("C-M-w" . sp-copy-sexp)
+
+        ("M-<delete>" . sp-unwrap-sexp)
+        ("M-<backspace>" . sp-backward-unwrap-sexp)
+
+        ("C-<right>" . sp-forward-slupr-sexp)
+        ("C-<left>" . sp-forward-barf-sexp)
+        ("C-M-<left>" . sp-backward-slurp-sexp)
+        ("C-M-<right>" . sp-backward-barf-sexp)
+
+        ("M-D" . sp-splice-sexp)
+        ("C-M-<delete>" . sp-splice-sexp-killing-forward)
+        ("C-M-<backspace>" . sp-splice-sexp-killing-backward)
+        ("C-S-<backspace>" . sp-splice-sexp-killing-around)
+
+        ("C-]" . sp-select-next-thing)
+        ("<C-[>" . sp-select-previous-thing-exchange)
+        ("C-M-]" . sp-select-next-thing-exchange)
+        ("M-ESC" . sp-select-previous-thing) ; This is technically C-M-[
+
+        ("M-F" . sp-forward-symbol)
+        ("M-B" . sp-backward-symbol)
+
+        ("C-M-s" . smartparens-hydra/body))
+  :config
+  (require 'smartparens-config)
+  (require 'smartparens-lua)
+  (smartparens-global-mode)
+  (show-smartparens-global-mode t)
+  (add-hook 'minibuffer-setup-hook 'turn-on-smartparens-strict-mode)
+  )
+
+(use-package ag
+  :ensure t
+  :config
+  (setq ag-highlight-search t))
+
+(use-package highlight-indentation
+  :ensure t)
+
+(use-package dired
+  :config
+  (use-package dired-x
+    :bind ("C-x C-j" . dired-jump))
+  (use-package dired-details+
+    :ensure t))
+
+;; Language:
+
+;; Python
+(use-package elpy
+  :pin elpy
+  :ensure t
+  :config
+  (require 'smartparens-python)
+  (elpy-enable))
+
+;; Ruby
+(use-package rvm
+  :ensure t
+  :config
+  (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate)
+    (rvm-activate-corresponding-ruby)))
+
+(use-package ruby-mode
+  :ensure t
+  :init
+  (defun my-ruby-align-chain (orig-fun kind token)
+  (pcase (cons kind token)
+    (`(:before . ".")
+     (if (smie-rule-sibling-p)
+         (when ruby-align-chained-calls
+	   (smie-backward-sexp ".")
+	   (cons 'column (current-column)))
+       (smie-backward-sexp ";")
+       (cons 'column (+ (smie-indent-virtual) ruby-indent-level))))
+    (`(:before . "+")
+       (smie-backward-sexp ";")
+     (cons 'column (+ (smie-indent-virtual) ruby-indent-level)))
+    (otherwise (funcall orig-fun kind token))))
+  :mode ("\\.\\(gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|thor\\)\\'"
+         "Gemfile\\(\\.lock\\)?\\|\\(Cap\\|Guard\\|[rR]ake\\|Vagrant\\)file\\'")
+  :interpreter "ruby"
+  :config
+  (require 'smartparens-ruby)
+  (setq ruby-align-chained-calls nil
+	ruby-use-smie t)
+  (advice-add 'ruby-smie-rules :around 'my-ruby-align-chain)
+  (add-hook
+   'ruby-mode-hook
+   (lambda ()
+     (robe-mode)
+     (highlight-indentation-current-column-mode)
+     (setq show-trailing-whitespace t)
+     (set-fill-column 90)))
+  )
+
+(use-package robe
+  :ensure t
+  :commands (robe-mode)
+  :config
+  (robe-start t)
+  (push 'company-robe company-backends))
+
+;; LaTeX
+;; TODO: Put this in use-package LaTeX-mode
+(use-package auctex
+  :ensure t
+  :mode ("\\.tex\\'" . latex-mode)
+  :config
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+  (setq-default TeX-master nil)
+  (setq reftex-plug-into-AUCTeX t)
+  (add-hook 'LaTeX-mode-hook
+            (lambda ()
+              (visual-line-mode)
+              (LaTeX-math-mode)
+              (turn-on-reftex)
+              (turn-on-auto-fill)
+              (set-fill-column 115))))
+
+;; Web
+(use-package yaml-mode
+  :ensure t
+  :mode "\\.yml\\'")
+
+(use-package haml-mode
+  :ensure t
+  :mode "\\.haml\\'")
+
+(use-package js2-mode
+  :ensure t)
+
+(use-package stylus-mode
+  :ensure t
+  :mode "\\.styl\\'")
+
+(use-package json-mode
+  :ensure t)
+
+(use-package web-mode
+  :ensure t
+  :mode ("\\.html?\\'" "\\.js?\\'" "\\.hbs\\'" "\\.css\\'" "\\.tpl\\'")
+  :config
+  (setq web-mode-content-types-alist
+        '(("jsx"  . "/affinity/assets/javascripts/.*\\.js[x]?\\'")
+          ("underscorejs"  . ".*\\.tpl\\'")))
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-attr-indent-offset 2)
+  (add-to-list 'web-mode-indentation-params '("lineup-args" . nil))
+  (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil))
+  (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
+  (add-to-list 'web-mode-indentation-params '("lineup-ternary" . nil))
+  (setq web-mode-enable-auto-pairing nil)
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (set-fill-column 90)
+              (setq show-trailing-whitespace t)
+              )))
+
+;; Lua
+(use-package lua-mode
+  :ensure t
+  :mode "\\.lua\\'"
+  :config
+  (setq lua-indent-level 2))
+
+;; Custom after
+
+(use-package my-flycheck-checkers
+  :load-path "lisp/")
+
+;;; init.el ends here
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#eee8d5" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#839496"])
- '(company-idle-delay 1)
- '(compilation-message-face (quote default))
+ '(ansi-color-faces-vector
+   [default bold shadow italic underline bold bold-italic bold])
+ '(ansi-term-color-vector
+   [unspecified "#FFFFFF" "#d15120" "#5f9411" "#d2ad00" "#6b82a7" "#a66bab" "#6b82a7" "#505050"])
  '(confirm-kill-emacs (quote y-or-n-p))
- '(cua-global-mark-cursor-color "#2aa198")
- '(cua-normal-cursor-color "#657b83")
- '(cua-overwrite-cursor-color "#b58900")
- '(cua-read-only-cursor-color "#859900")
  '(custom-enabled-themes (quote (solarized-light)))
  '(custom-safe-themes
    (quote
-    ("a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default)))
- '(eclim-eclipse-dirs (quote ("/home/william/util/eclipse")))
- '(eclim-executable "/home/william/util/eclipse/eclim")
- '(ede-project-directories (quote ("~/rc/ramcloud")))
- '(fci-rule-color "windowFrameColor")
- '(flycheck-gcc-language-standard "c++11")
- '(frame-background-mode (quote light))
- '(highlight-changes-colors (quote ("#d33682" "#6c71c4")))
- '(highlight-symbol-colors
-   (--map
-    (solarized-color-blend it "#fdf6e3" 0.25)
-    (quote
-     ("#b58900" "#2aa198" "#dc322f" "#6c71c4" "#859900" "#cb4b16" "#268bd2"))))
- '(highlight-symbol-foreground-color "#586e75")
- '(highlight-tail-colors
-   (quote
-    (("#eee8d5" . 0)
-     ("#B4C342" . 20)
-     ("#69CABF" . 30)
-     ("#69B7F0" . 50)
-     ("#DEB542" . 60)
-     ("#F2804F" . 70)
-     ("#F771AC" . 85)
-     ("#eee8d5" . 100))))
- '(hl-bg-colors
-   (quote
-    ("#DEB542" "#F2804F" "#FF6E64" "#F771AC" "#9EA0E5" "#69B7F0" "#69CABF" "#B4C342")))
- '(hl-fg-colors
-   (quote
-    ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
- '(icicle-buffer-include-recent-files-nflag 5)
+    ("c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+ '(fci-rule-character-color "#d9d9d9")
+ '(hl-sexp-background-color "#efebe9")
+ '(inhibit-startup-screen t)
  '(magit-diff-use-overlays nil)
- '(nrepl-message-colors
-   (quote
-    ("#dc322f" "#cb4b16" "#b58900" "#546E00" "#B4C342" "#00629D" "#2aa198" "#d33682" "#6c71c4")))
  '(package-selected-packages
    (quote
-    (wgrep wgrep-ag elpy json-mode hydra use-package exec-path-from-shell web-mode ag js2-mode haml-mode column-marker stylus-mode sws-mode fuzzy-match projectile malabar-mode inf-groovy groovy-mode smartparens highlight-indent-guides robe rvm auctex emacs-eclim seq geiser highlight-parentheses solarized-theme facemenu+ floobits idle-highlight-mode paredit actionscript-mode list-processes+ protobuf-mode magit magit-gh-pulls magit-tramp flycheck workgroups2 win-switch shell-switcher multi-eshell lua-mode icicles gradle-mode glsl-mode company cmake-project cmake-mode)))
- '(pos-tip-background-color "#eee8d5")
- '(pos-tip-foreground-color "#586e75")
- '(python-shell-interpreter "python3")
- '(shell-switcher-mode t)
- '(shell-switcher-new-shell-function (quote shell-switcher-make-eshell))
- '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
- '(term-default-bg-color "#fdf6e3")
- '(term-default-fg-color "#657b83")
- '(vc-annotate-background nil)
- '(vc-annotate-color-map
-   (quote
-    ((20 . "#dc322f")
-     (40 . "#c85d17")
-     (60 . "#be730b")
-     (80 . "#b58900")
-     (100 . "#a58e00")
-     (120 . "#9d9100")
-     (140 . "#959300")
-     (160 . "#8d9600")
-     (180 . "#859900")
-     (200 . "#669b32")
-     (220 . "#579d4c")
-     (240 . "#489e65")
-     (260 . "#399f7e")
-     (280 . "#2aa198")
-     (300 . "#2898af")
-     (320 . "#2793ba")
-     (340 . "#268fc6")
-     (360 . "#268bd2"))))
- '(vc-annotate-very-old-color nil)
- '(weechat-color-list
-   (quote
-    (unspecified "#fdf6e3" "#eee8d5" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#657b83" "#839496")))
- '(xterm-color-names
-   ["#eee8d5" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#073642"])
- '(xterm-color-names-bright
-   ["#fdf6e3" "#cb4b16" "#93a1a1" "#839496" "#657b83" "#6c71c4" "#586e75" "#002b36"]))
+    (material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ json-mode js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-
-(put 'upcase-region 'disabled nil)
