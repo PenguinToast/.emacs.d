@@ -34,6 +34,10 @@
 (use-package revbufs
   :load-path "site-lisp/")
 
+(use-package goto-last-change
+  :load-path "site-lisp/"
+  :bind ("C-x C-\\" . goto-last-change))
+
 ;; Themes:
 
 (use-package solarized-theme
@@ -62,6 +66,9 @@
 
 ;; General:
 
+(use-package ibuffer
+  :bind ("C-x C-b" . ibuffer-other-window))
+
 (use-package exec-path-from-shell
   :ensure t
   :config (exec-path-from-shell-initialize))
@@ -77,10 +84,18 @@
 (use-package seq
   :ensure t)
 
+(use-package pos-tip
+  :ensure t)
+
 (use-package company
   :ensure t
-  :config (global-company-mode)
   :bind ("M-/" . company-complete)
+  :config
+  (global-company-mode)
+  (use-package company-quickhelp
+    :ensure t
+    :config
+    (company-quickhelp-mode 1))
   )
 
 (use-package projectile
@@ -303,15 +318,18 @@
   :ensure t
   :mode "\\.styl\\'")
 
-(use-package json-mode
-  :ensure t)
-
 (use-package web-mode
   :ensure t
-  :mode ("\\.html?\\'" "\\.js?\\'" "\\.hbs\\'" "\\.css\\'" "\\.tpl\\'")
+  :mode ("\\.html?\\'"
+         "\\.js?\\'"
+         "\\.hbs\\'"
+         "\\.css\\'"
+         "\\.tpl\\'"
+         "\\.json\\'")
   :config
   (setq web-mode-content-types-alist
         '(("jsx"  . "/affinity/assets/javascripts/.*\\.js[x]?\\'")
+          ("jsx"  . "/workspace/mobile/.*\\.js[x]?\\'")
           ("underscorejs"  . ".*\\.tpl\\'")))
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-css-indent-offset 2)
@@ -327,6 +345,21 @@
               (set-fill-column 90)
               (setq show-trailing-whitespace t)
               )))
+
+;; Elm
+(use-package elm-mode
+  :ensure t
+  :mode "\\.elm\\'"
+  :config
+  (use-package flycheck-elm
+    :ensure t
+    :config
+    (add-hook 'flycheck-mode-hook #'flycheck-elm-setup))
+  (setq elm-tags-on-save t)
+  (setq elm-indent-offset 2)
+  (add-to-list 'company-backends 'company-elm)
+  (add-hook 'elm-mode-hook #'elm-oracle-setup-completion)
+  )
 
 ;; Lua
 (use-package lua-mode
@@ -361,7 +394,9 @@
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
    (quote
-    (material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ json-mode js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))))
+    (flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag)))
+ '(standard-indent 2)
+ '(tags-revert-without-query t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
