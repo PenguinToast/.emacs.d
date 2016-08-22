@@ -7,7 +7,7 @@
   "Delete a single word backwards when no region."
   (interactive
    (if mark-active (list (region-beginning) (region-end))
-     (list (save-excursion (backward-word 1) (point)) (point)))))
+     (list (save-excursion (sp-backward-sexp 1) (point)) (point)))))
 
 
 (defvar swapping-buffer nil)
