@@ -128,4 +128,4 @@ alias emacsc="emacsclient -c -a emacs"           # new - opens the GUI with
 
 alias tmux="tmux -2"
 
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+source "$HOME/.rvm/scripts/rvm"

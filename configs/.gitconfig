@@ -1,7 +1,0 @@
-[user]
-	name = William Sheu
-	email = sheu.william@gmail.com
-[push]
-	default = simple
-[core]
-	editor = emacsclient -t
