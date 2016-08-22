@@ -154,6 +154,7 @@ bindsym $mod+r mode "resize"
 # finds out, if available)
 bar {
         status_command py3status -c ~/.i3/i3status.conf -i ~/.i3/modules/
+	strip_workspace_numbers yes
 }
 
 # Move the current workspace to the next output
@@ -167,24 +168,26 @@ exec_always xmodmap ~/.xmodmap
 exec --no-startup-id nm-applet
 exec --no-startup-id udiskie --tray
 exec --no-startup-id redshift
+exec --no-startup-id light-locker
 
 # Named workspaces
-bindsym $mod+a workspace term
-bindsym $mod+s workspace emacs
-bindsym $mod+d workspace web
-bindsym $mod+Shift+a move container to workspace term
-bindsym $mod+Shift+s move container to workspace emacs
-bindsym $mod+Shift+d move container to workspace web
+bindsym $mod+a workspace 11:term
+bindsym $mod+s workspace 12:emacs
+bindsym $mod+d workspace 13:web
+bindsym $mod+Shift+a move container to workspace 11:term
+bindsym $mod+Shift+s move container to workspace 12:emacs
+bindsym $mod+Shift+d move container to workspace 13:web
 
 # Don't auto-assign terminal
 # assign [class="Gnome-terminal"] term
-assign [class="Emacs"] emacs
-assign [class="Google-chrome"] web
+assign [class="Emacs"] 12:emacs
+assign [class="Google-chrome"] 13:web
 
 # Autostart applications
-exec i3-msg 'workspace term; exec i3-sensible-terminal'
-exec --no-startup-id i3-msg 'exec emacs'
-exec --no-startup-id i3-msg 'exec google-chrome; workspace 1'
+exec --no-startup-id i3-msg 'workspace 11:term; exec i3-sensible-terminal'
+exec --no-startup-id i3-msg 'workspace 12:emacs; exec emacs'
+exec --no-startup-id i3-msg 'workspace 13:web; exec google-chrome'
+exec --no-startup-id i3-msg 'workspace 1'
 
 bindsym $mod+Tab workspace next_on_output
 bindsym $mod+Shift+Tab workspace prev_on_output
@@ -199,8 +202,8 @@ bindsym Shift+XF86AudioRaiseVolume exec pactl set-sink-volume 1 +1% && killall -
 bindsym Shift+XF86AudioLowerVolume exec pactl set-sink-volume 1 -1% && killall -USR1 py3status
 
 # Sreen brightness controls
-bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # increase screen brightness
-bindsym XF86MonBrightnessDown exec xbacklight -dec 20 # decrease screen brightness
+bindsym XF86MonBrightnessUp exec xbacklight -inc 10 # increase screen brightness
+bindsym XF86MonBrightnessDown exec xbacklight -dec 10 # decrease screen brightness
 
 # Media player controls
 bindsym XF86AudioPlay exec playerctl play-pause
@@ -224,3 +227,4 @@ mode "$mode_system" {
 bindsym $mod+Escape mode "$mode_system"
 
 exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png
+exec --no-startup-id xset s off

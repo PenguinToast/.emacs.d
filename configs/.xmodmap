@@ -4,10 +4,20 @@
 ! in the xmodmap(1) man page.)
 !
 keycode 66 = Control_L Control_L Control_L Control_L Control_L Control_L Control_L Control_L
+
+! Menu key to Super_R
+keycode 135 = Super_R
+
+! Left ctrl to hyper key
+keycode 37 = Hyper_L
+
 clear Lock
 clear Control
-! Left caps to win key
-keycode 37 = Super_L
-add Control = Control_L
+add Control = Control_L Control_R
 
-keycode 135 = Super_R
+clear mod4
+add mod4 = Super_L Super_R
+
+clear mod3
+add mod3 = Hyper_L
+
