@@ -322,6 +322,7 @@
   :ensure t
   :mode ("\\.html?\\'"
          "\\.js?\\'"
+         "\\.jsx\\'"
          "\\.hbs\\'"
          "\\.css\\'"
          "\\.tpl\\'"
@@ -396,7 +397,10 @@
    (quote
     (flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag)))
  '(standard-indent 2)
- '(tags-revert-without-query t))
+ '(tags-revert-without-query t)
+ '(web-mode-code-indent-offset 2)
+ '(web-mode-css-indent-offset 2)
+ '(web-mode-markup-indent-offset 2))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

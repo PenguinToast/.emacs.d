@@ -31,7 +31,8 @@
   :error-filter my-npm-eslint-error-filter
   :modes (web-mode)
   :predicate (lambda () (member web-mode-content-type '("javascript" "jsx"))))
-(add-to-list 'flycheck-checkers 'npm-eslint)
+;; (add-to-list 'flycheck-checkers 'npm-eslint)
+(flycheck-add-mode 'javascript-eslint 'web-mode)
 
 (provide 'my-flycheck-checkers)
 ;;; my-flycheck-checkers.el ends here
