@@ -88,7 +88,7 @@ bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 
 # focus the parent container
-bindsym $mod+z focus parent
+bindsym $mod+u focus parent
 
 # focus the child container
 #bindsym $mod+d focus child
@@ -153,8 +153,9 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-        status_command py3status -c ~/.i3/i3status.conf -i ~/.i3/modules/
-	strip_workspace_numbers yes
+    status_command py3status -c ~/.i3/i3status.conf -i ~/.i3/modules/
+    strip_workspace_numbers yes
+    mode hide
 }
 
 # Move the current workspace to the next output
@@ -174,18 +175,22 @@ exec --no-startup-id light-locker
 bindsym $mod+a workspace 11:term
 bindsym $mod+s workspace 12:emacs
 bindsym $mod+d workspace 13:web
+bindsym $mod+z workspace 14:slack
 bindsym $mod+Shift+a move container to workspace 11:term
 bindsym $mod+Shift+s move container to workspace 12:emacs
 bindsym $mod+Shift+d move container to workspace 13:web
+bindsym $mod+Shift+z move container to workspace 14:slack
 
 # Don't auto-assign terminal
 # assign [class="Gnome-terminal"] term
 assign [class="Emacs"] 12:emacs
 assign [class="Google-chrome"] 13:web
+assign [class="Slack"] 14:slack
 
 # Autostart applications
 exec --no-startup-id i3-msg 'workspace 11:term; exec i3-sensible-terminal'
 exec --no-startup-id i3-msg 'workspace 12:emacs; exec emacs'
+exec --no-startup-id i3-msg 'workspace 14:slack; exec slack'
 exec --no-startup-id i3-msg 'workspace 13:web; exec google-chrome'
 exec --no-startup-id i3-msg 'workspace 1'
 
