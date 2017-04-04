@@ -3,35 +3,16 @@
 
 ;;; Code:
 
-(defun my-npm-eslint-error-filter (errors)
-  "Copy of eslint error filter."
-  (seq-do (lambda (err)
-            ;; Parse error ID from the error message
-            (setf (flycheck-error-message err)
-                  (replace-regexp-in-string
-                   (rx " ("
-                       (group (one-or-more (not (any ")"))))
-                       ")" string-end)
-                   (lambda (s)
-                     (setf (flycheck-error-id err)
-                           (match-string 1 s))
-                     "")
-                   (flycheck-error-message err))))
-          (flycheck-sanitize-errors errors))
-  errors)
-
-(flycheck-define-checker npm-eslint
-  "eslint, but run with npm"
-  :command ("npm" "run" "--silent" "--" "eslint" "--format=checkstyle"
-            (config-file "--config" flycheck-eslintrc)
-            (option "--rulesdir" flycheck-eslint-rulesdir)
-            "--stdin" "--stdin-filename" source-original)
-  :standard-input t
-  :error-parser flycheck-parse-checkstyle
-  :error-filter my-npm-eslint-error-filter
-  :modes (web-mode)
-  :predicate (lambda () (member web-mode-content-type '("javascript" "jsx"))))
-;; (add-to-list 'flycheck-checkers 'npm-eslint)
+(defun my/use-eslint-from-node-modules ()
+  (let* ((root (locate-dominating-file
+                (or (buffer-file-name) default-directory)
+                "node_modules"))
+         (eslint (and root
+                      (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                        root))))
+    (when (and eslint (file-executable-p eslint))
+      (setq-local flycheck-javascript-eslint-executable eslint))))
+(add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
 (flycheck-add-mode 'javascript-eslint 'web-mode)
 
 (provide 'my-flycheck-checkers)

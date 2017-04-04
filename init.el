@@ -94,13 +94,17 @@
   (global-company-mode)
   (use-package company-quickhelp
     :ensure t
+    :bind (:map company-active-map
+                ("M-h" . company-quickhelp-manual-begin))
     :config
     (company-quickhelp-mode 1))
+  (use-package company-go
+    :ensure t)
   )
 
 (use-package projectile
   :ensure t
-  :config (projectile-global-mode))
+  :config (projectile-mode))
 
 (use-package fuzzy-match
   :ensure t)
@@ -109,6 +113,32 @@
   :ensure t
   :config
   (icy-mode 1))
+
+(use-package ivy
+  :ensure t
+  :bind (("C-s" . swiper)
+         ("C-c C-r" . ivy-resume))
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq enable-recursive-minibuffers t)
+  (setq magit-completing-read-function 'ivy-completing-read)
+  (setq projectile-completion-system 'ivy)
+  (use-package counsel
+    :ensure t
+    :bind (("M-x" . counsel-M-x)
+           ("C-x C-f" . counsel-find-file)
+           :map read-expression-map
+           ("C-r" . counsel-expression-history))
+    :config
+    (use-package counsel-projectile
+      :ensure t
+      :config
+      (counsel-projectile-on))
+    )
+  (use-package ivy-hydra
+    :ensure t)
+  )
 
 (use-package win-switch
   :ensure t
@@ -131,6 +161,12 @@
         wg-mode-line-decor-right-brace "]"  ; how to surround it
         wg-mode-line-decor-divider ":")
   (workgroups-mode 1)
+  (run-with-idle-timer 30 t
+                       (lambda ()
+                         (unless (minibufferp)
+                           (let ((inhibit-message t))
+                             (wg-save-session)))
+                         ))
   )
 
 (use-package flycheck
@@ -139,7 +175,9 @@
 
 (use-package magit
   :ensure t
-  :bind ("C-x g" . magit-status))
+  :bind ("C-x g" . magit-status)
+  :config
+  (setq git-commit-fill-column 72))
 
 (use-package magit-gh-pulls
   :ensure t
@@ -210,6 +248,12 @@
   (smartparens-global-mode)
   (show-smartparens-global-mode t)
   (add-hook 'minibuffer-setup-hook 'turn-on-smartparens-strict-mode)
+  ;; Java generics
+  (defun not-sp-point-after-word-p (&rest args)
+    (not (apply 'sp-point-after-word-p args)))
+  (sp-with-modes 'jdee-mode
+    (sp-local-pair "<" ">" :when '(sp-point-after-word-p))
+    )
   )
 
 (use-package ag
@@ -326,16 +370,15 @@
          "\\.hbs\\'"
          "\\.css\\'"
          "\\.tpl\\'"
-         "\\.json\\'")
+         "\\.json\\'"
+         "\\.eslintrc\\'")
   :config
   (setq web-mode-content-types-alist
         '(("jsx"  . "/affinity/assets/javascripts/.*\\.js[x]?\\'")
           ("jsx"  . "/workspace/mobile/.*\\.js[x]?\\'")
+          ("json" . "\\.eslintrc\\'")
           ("underscorejs"  . ".*\\.tpl\\'")))
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-attr-indent-offset 2)
+  (defvaralias 'standard-indent 'tab-width)
   (add-to-list 'web-mode-indentation-params '("lineup-args" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
@@ -345,6 +388,10 @@
             (lambda ()
               (set-fill-column 90)
               (setq show-trailing-whitespace t)
+              ;; (setq web-mode-markup-indent-offset tab-width)
+              ;; (setq web-mode-css-indent-offset tab-width)
+              ;; (setq web-mode-code-indent-offset tab-width)
+              ;; (setq web-mode-attr-indent-offset tab-width)
               )))
 
 ;; Elm
@@ -357,7 +404,7 @@
     :config
     (add-hook 'flycheck-mode-hook #'flycheck-elm-setup))
   (setq elm-tags-on-save t)
-  (setq elm-indent-offset 2)
+  (defvaralias 'elm-indent-offset 'tab-width)
   (add-to-list 'company-backends 'company-elm)
   (add-hook 'elm-mode-hook #'elm-oracle-setup-completion)
   )
@@ -367,7 +414,82 @@
   :ensure t
   :mode "\\.lua\\'"
   :config
-  (setq lua-indent-level 2))
+  (defvaralias 'lua-indent-level 'tab-width))
+
+;; Java
+(use-package jdee
+  :ensure t
+  ;:mode ("\\.java\\'" . jdee-mode)
+  :bind (:map jdee-mode-map
+              ("M-." . jdee-open-class-at-point))
+  :config
+  (setq jdee-server-dir "/home/william/package_source/jdee-server/target"))
+
+;; Research
+(use-package org
+  :ensure t
+  :mode ("\\.org\\'" . org-mode)
+  :config
+  (setq org-log-done t))
+
+(use-package go-mode
+  :ensure t
+  :mode "\\.go\\'"
+  :bind (:map go-mode-map
+              ("M-." . godef-jump))
+  :config
+  (add-hook
+   `go-mode-hook
+   (lambda ()
+     (setq-local indent-tabs-mode t)))
+  )
+
+(use-package flycheck-gometalinter
+  :disabled
+  :ensure t
+  :config
+  ;; skips 'vendor' directories and sets GO15VENDOREXPERIMENT=1
+  (setq-default flycheck-gometalinter-vendor t)
+  ;; only run fast linters
+  (setq-default flycheck-gometalinter-fast t)
+  ;; use in tests files
+  (setq-default flycheck-gometalinter-test t)
+  (progn
+    (flycheck-gometalinter-setup)))
+
+(use-package rtags
+  :ensure t
+  :bind (:map c-mode-base-map
+              ("M-." . rtags-find-symbol-at-point)
+              ("M-," . rtags-find-references-at-point)
+              ("C-." . rtags-find-symbol)
+              ("C-," . rtags-find-references)
+              ("C-c r s" . rtags-display-summary))
+  :config
+  (defun setup-flycheck-rtags ()
+    (interactive)
+    (flycheck-select-checker 'rtags)
+    ;; RTags creates more accurate overlays.
+    (setq-local flycheck-highlighting-mode nil)
+    (setq-local flycheck-check-syntax-automatically nil))
+
+  ;; install standard rtags keybindings. Do M-. on the symbol below to
+  ;; jump to definition and see the keybindings.
+  (rtags-enable-standard-keybindings)
+  ;; company completion setup
+  (setq rtags-autostart-diagnostics t)
+  (rtags-diagnostics)
+  (setq rtags-completions-enabled t)
+  (push 'company-rtags company-backends)
+  ;; use rtags flycheck mode -- clang warnings shown inline
+  (require 'flycheck-rtags)
+  ;; c-mode-common-hook is also called by c++-mode
+  (add-hook 'c-mode-common-hook #'setup-flycheck-rtags)
+  )
+
+(use-package dockerfile-mode
+  :ensure t
+  :mode "Dockerfile\\'")
 
 ;; Custom after
 
@@ -389,18 +511,24 @@
  '(custom-safe-themes
    (quote
     ("c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+ '(dired-details-initially-hide nil)
  '(fci-rule-character-color "#d9d9d9")
+ '(flycheck-gometalinter-fast t)
+ '(flycheck-gometalinter-tests t)
+ '(flycheck-gometalinter-vendor t)
  '(hl-sexp-background-color "#efebe9")
  '(inhibit-startup-screen t)
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
    (quote
-    (flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag)))
- '(standard-indent 2)
- '(tags-revert-without-query t)
- '(web-mode-code-indent-offset 2)
- '(web-mode-css-indent-offset 2)
- '(web-mode-markup-indent-offset 2))
+    (dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag)))
+ '(safe-local-variable-values
+   (quote
+    ((flycheck-gcc-include-path "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/user" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/kernel")
+     (projectile-project-compilation-cmd . "go install")
+     (flycheck-gcc-include-path . "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src")
+     (projectile-project-name . "cs186-project"))))
+ '(tags-revert-without-query t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
