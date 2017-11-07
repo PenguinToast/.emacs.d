@@ -40,7 +40,7 @@
   (interactive)
   (setq swapping-buffer (current-buffer))
   (setq swapping-window (selected-window))
-  (select-window (get-largest-window))
+  (select-window (get-largest-window nil nil t))
   (swap-buffers-in-windows))
 (global-set-key (kbd "C-x c") 'move-buffer-to-largest-window)
 
