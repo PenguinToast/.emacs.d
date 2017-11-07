@@ -116,6 +116,7 @@
 
 (use-package ivy
   :ensure t
+  :demand
   :bind (("C-s" . swiper)
          ("C-c C-r" . ivy-resume))
   :config
@@ -284,12 +285,14 @@
 ;; Ruby
 (use-package rvm
   :ensure t
+  :disabled
   :config
   (defadvice inf-ruby-console-auto (before activate-rvm-for-robe activate)
     (rvm-activate-corresponding-ruby)))
 
 (use-package ruby-mode
   :ensure t
+  :disabled
   :init
   (defun my-ruby-align-chain (orig-fun kind token)
   (pcase (cons kind token)
@@ -323,6 +326,7 @@
 
 (use-package robe
   :ensure t
+  :disabled
   :commands (robe-mode)
   :config
   (robe-start t)
