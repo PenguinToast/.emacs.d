@@ -274,6 +274,10 @@
 
 ;; Language:
 
+;; Bison
+(use-package bison-mode
+  :ensure t)
+
 ;; Python
 (use-package elpy
   :pin elpy
@@ -525,13 +529,14 @@
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
    (quote
-    (dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag)))
+    (bison-mode dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag)))
  '(safe-local-variable-values
    (quote
     ((flycheck-gcc-include-path "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/user" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/kernel")
      (projectile-project-compilation-cmd . "go install")
      (flycheck-gcc-include-path . "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src")
      (projectile-project-name . "cs186-project"))))
+ '(sp-escape-quotes-after-insert nil)
  '(tags-revert-without-query t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -199,16 +199,16 @@ bindsym $mod+Shift+Tab workspace prev_on_output
 # grrr... there's no output next
 bindsym $alt+Tab focus output right
 # Pulse Audio controls
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 1 +5% && killall -USR1 py3status #increase sound volume
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume 1 -5% && killall -USR1 py3status #decrease sound volume
-bindsym XF86AudioMute exec pactl set-sink-mute 1 toggle && killall -USR1 py3status # mute sound
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 0 +5% && killall -USR1 py3status #increase sound volume
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume 0 -5% && killall -USR1 py3status #decrease sound volume
+bindsym XF86AudioMute exec pactl set-sink-mute 0 toggle && killall -USR1 py3status # mute sound
 # Incremental
-bindsym Shift+XF86AudioRaiseVolume exec pactl set-sink-volume 1 +1% && killall -USR1 py3status
-bindsym Shift+XF86AudioLowerVolume exec pactl set-sink-volume 1 -1% && killall -USR1 py3status
+bindsym Shift+XF86AudioRaiseVolume exec pactl set-sink-volume 0 +1% && killall -USR1 py3status
+bindsym Shift+XF86AudioLowerVolume exec pactl set-sink-volume 0 -1% && killall -USR1 py3status
 
 # Sreen brightness controls
-bindsym XF86MonBrightnessUp exec xbacklight -inc 10 # increase screen brightness
-bindsym XF86MonBrightnessDown exec xbacklight -dec 10 # decrease screen brightness
+# bindsym XF86MonBrightnessUp exec xbacklight -inc 10 # increase screen brightness
+# bindsym XF86MonBrightnessDown exec xbacklight -dec 10 # decrease screen brightness
 
 # Media player controls
 bindsym XF86AudioPlay exec playerctl play-pause
