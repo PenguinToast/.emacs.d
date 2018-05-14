@@ -135,7 +135,7 @@
     (use-package counsel-projectile
       :ensure t
       :config
-      (counsel-projectile-on))
+      (counsel-projectile-mode))
     )
   (use-package ivy-hydra
     :ensure t)
@@ -488,8 +488,12 @@
   (setq rtags-autostart-diagnostics t)
   (rtags-diagnostics)
   (setq rtags-completions-enabled t)
+  (use-package company-rtags
+    :ensure t)
   (push 'company-rtags company-backends)
   ;; use rtags flycheck mode -- clang warnings shown inline
+  (use-package flycheck-rtags
+    :ensure t)
   (require 'flycheck-rtags)
   ;; c-mode-common-hook is also called by c++-mode
   (add-hook 'c-mode-common-hook #'setup-flycheck-rtags)
