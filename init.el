@@ -11,7 +11,7 @@
 (add-to-list 'package-archives
 	     '("marmalade" . "http://marmalade-repo.org/packages/"))
 
-(package-initialize)
+; (package-initialize)
 
 ; Bootstrap `use-package'
 (unless (package-installed-p 'use-package)
@@ -30,6 +30,10 @@
 (use-package my-functions
   :load-path "lisp/")
 
+(use-package google-c-style
+  :load-path "lisp/"
+  :hook (c-mode-common . google-set-c-style))
+
 ;; site-lisp:
 (use-package revbufs
   :load-path "site-lisp/")
@@ -37,6 +41,16 @@
 (use-package goto-last-change
   :load-path "site-lisp/"
   :bind ("C-x C-\\" . goto-last-change))
+
+(use-package prolog
+  :load-path "site-lisp/"
+  :mode "\\.pl\\'"
+  :bind (:map prolog-mode-map
+              ("C-c C-e" . ediprolog-dwim))
+  :config
+  (setq prolog-system 'swi)
+  (use-package ediprolog
+    :ensure t))
 
 ;; Themes:
 
@@ -104,7 +118,10 @@
 
 (use-package projectile
   :ensure t
-  :config (projectile-mode))
+  :config
+  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (projectile-mode +1))
 
 (use-package fuzzy-match
   :ensure t)
@@ -272,11 +289,66 @@
   (use-package dired-details+
     :ensure t))
 
+(use-package ivy-xref
+  :ensure t
+  :init (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+
+(use-package lsp-mode
+  :ensure t
+  :commands lsp)
+
+(use-package lsp-ui
+  :ensure t
+  :after lsp-mode
+  :commands lsp-ui-mode
+  :hook (lsp . lsp-ui-mode)
+  )
+
+(use-package company-lsp
+  :ensure t
+  :after (lsp-mode company)
+  :commands company-lsp
+  :config
+  (push 'company-lsp company-backends)
+  (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil))
+
 ;; Language:
+
+;; Markdown
+(use-package markdown-mode
+  :ensure t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "pandoc"))
+
+(use-package flymd
+  :ensure t
+  :commands (flymd-flyit)
+  :config
+  (defun my-flymd-browser-function (url)
+    (let ((browse-url-browser-function 'browse-url-firefox))
+      (browse-url url)))
+  (setq flymd-browser-open-function 'my-flymd-browser-function))
+
+;; C/C++
+;; (defun ccls//enable ()
+;;   (condition-case nil
+;;       (lsp-ccls-enable)
+;;     (user-error nil)))
+
+(use-package ccls
+  :ensure t
+  :hook ((c-mode c++-mode objc-mode) .
+         (lambda () (require 'ccls) (lsp)))
+  :custom
+  (ccls-executable "/home/william/package_src/ccls/Release/ccls"))
 
 ;; Bison
 (use-package bison-mode
-  :ensure t)
+  :ensure
+  :mode ("\\.\\(l\\|y\\)\\'"))
 
 ;; Python
 (use-package elpy
@@ -284,7 +356,9 @@
   :ensure t
   :config
   (require 'smartparens-python)
-  (elpy-enable))
+  (elpy-enable)
+  ;; TODO: FIXME
+  (add-to-list 'flycheck-disabled-checkers 'python-flake8))
 
 ;; Ruby
 (use-package rvm
@@ -354,7 +428,38 @@
               (turn-on-auto-fill)
               (set-fill-column 115))))
 
+(defun setup-tide-mode ()
+  (interactive)
+  (tide-setup)
+  ;; (flycheck-mode +1)
+  ;; (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  ;; (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  ;; company is an optional dependency. You have to
+  ;; install it separately via package-install
+  ;; `M-x package-install [ret] company`
+  ;; (company-mode +1)
+  )
+
 ;; Web
+(use-package typescript-mode
+  :mode ("\\.ts\\'")
+  :config
+  (setq-default typescript-indent-level 2))
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         ;; (before-save . tide-format-before-save)
+         )
+  :config
+  (defadvice tide-jump-to-definition
+      (before advice-tide-jump activate)
+    (push-mark))
+  )
+
 (use-package yaml-mode
   :ensure t
   :mode "\\.yml\\'")
@@ -379,28 +484,39 @@
          "\\.css\\'"
          "\\.tpl\\'"
          "\\.json\\'"
-         "\\.eslintrc\\'")
+         "\\.eslintrc\\'"
+         "\\.tsx\\'")
   :config
   (setq web-mode-content-types-alist
         '(("jsx"  . "/affinity/assets/javascripts/.*\\.js[x]?\\'")
           ("jsx"  . "/workspace/mobile/.*\\.js[x]?\\'")
           ("json" . "\\.eslintrc\\'")
           ("underscorejs"  . ".*\\.tpl\\'")))
+  (makunbound 'standard-indent)
   (defvaralias 'standard-indent 'tab-width)
   (add-to-list 'web-mode-indentation-params '("lineup-args" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-ternary" . nil))
+  (setq web-mode-markup-indent-offset tab-width)
+  (setq web-mode-css-indent-offset tab-width)
+  (setq web-mode-code-indent-offset tab-width)
+  (setq web-mode-attr-indent-offset tab-width)
   (setq web-mode-enable-auto-pairing nil)
   (add-hook 'web-mode-hook
             (lambda ()
               (set-fill-column 90)
               (setq show-trailing-whitespace t)
-              ;; (setq web-mode-markup-indent-offset tab-width)
-              ;; (setq web-mode-css-indent-offset tab-width)
-              ;; (setq web-mode-code-indent-offset tab-width)
-              ;; (setq web-mode-attr-indent-offset tab-width)
+              (when (string-equal "tsx" (file-name-extension buffer-file-name))
+                (setup-tide-mode))
               )))
+
+(use-package prettier-js
+  :ensure t
+  :config
+  (add-hook 'js2-mode-hook 'prettier-js-mode)
+  (add-hook 'web-mode-hook 'prettier-js-mode)
+  (add-hook 'typescript-mode-hook 'prettier-js-mode))
 
 ;; Elm
 (use-package elm-mode
@@ -452,6 +568,9 @@
      (setq-local indent-tabs-mode t)))
   )
 
+(use-package antlr-mode
+  :mode "\\.g4\\'")
+
 (use-package flycheck-gometalinter
   :disabled
   :ensure t
@@ -467,6 +586,7 @@
 
 (use-package rtags
   :ensure t
+  :disabled
   :bind (:map c-mode-base-map
               ("M-." . rtags-find-symbol-at-point)
               ("M-," . rtags-find-references-at-point)
@@ -518,11 +638,11 @@
    [default bold shadow italic underline bold bold-italic bold])
  '(ansi-term-color-vector
    [unspecified "#FFFFFF" "#d15120" "#5f9411" "#d2ad00" "#6b82a7" "#a66bab" "#6b82a7" "#505050"] t)
- '(confirm-kill-emacs (quote y-or-n-p))
- '(custom-enabled-themes (quote (solarized-light)))
+ '(ccls-executable "/home/william/package_src/ccls/Release/ccls")
+ '(confirm-kill-emacs 'y-or-n-p)
+ '(custom-enabled-themes '(solarized-light))
  '(custom-safe-themes
-   (quote
-    ("c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+   '("c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default))
  '(dired-details-initially-hide nil)
  '(fci-rule-character-color "#d9d9d9")
  '(flycheck-gometalinter-fast t)
@@ -530,16 +650,21 @@
  '(flycheck-gometalinter-vendor t)
  '(hl-sexp-background-color "#efebe9")
  '(inhibit-startup-screen t)
+ '(lsp-prefer-flymake nil)
+ '(lsp-ui-doc-enable nil)
+ '(lsp-ui-peek-enable nil)
+ '(lsp-ui-sideline-enable nil)
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
-   (quote
-    (bison-mode dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag)))
+   '(flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
+ '(prettier-js-show-errors 'echo)
+ '(projectile-globally-ignored-directories
+   '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
  '(safe-local-variable-values
-   (quote
-    ((flycheck-gcc-include-path "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/user" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/kernel")
+   '((flycheck-gcc-include-path "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/user" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/kernel")
      (projectile-project-compilation-cmd . "go install")
      (flycheck-gcc-include-path . "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src")
-     (projectile-project-name . "cs186-project"))))
+     (projectile-project-name . "cs186-project")))
  '(sp-escape-quotes-after-insert nil)
  '(tags-revert-without-query t))
 (custom-set-faces
@@ -547,4 +672,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(lsp-face-highlight-read ((t (:background "light coral"))))
+ '(lsp-face-highlight-textual ((t (:background "burlywood"))))
+ '(lsp-face-highlight-write ((t (:background "medium sea green")))))
