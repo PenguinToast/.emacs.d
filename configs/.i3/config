@@ -232,5 +232,8 @@ mode "$mode_system" {
 }
 bindsym $mod+Escape mode "$mode_system"
 
+bindsym --release Print exec shutter -s
+bindsym --release Shift+Print exec shutter -w
+
 exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png
 exec --no-startup-id xset s off

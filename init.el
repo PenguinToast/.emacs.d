@@ -96,7 +96,8 @@
   (global-idle-highlight-mode 1))
 
 (use-package seq
-  :ensure t)
+  ;; :ensure t
+  )
 
 (use-package pos-tip
   :ensure t)
@@ -128,6 +129,7 @@
 
 (use-package icicles
   :ensure t
+  :disabled
   :config
   (icy-mode 1))
 
@@ -241,7 +243,7 @@
         ("M-<delete>" . sp-unwrap-sexp)
         ("M-<backspace>" . sp-backward-unwrap-sexp)
 
-        ("C-<right>" . sp-forward-slupr-sexp)
+        ("C-<right>" . sp-forward-slurp-sexp)
         ("C-<left>" . sp-forward-barf-sexp)
         ("C-M-<left>" . sp-backward-slurp-sexp)
         ("C-M-<right>" . sp-backward-barf-sexp)
@@ -313,6 +315,14 @@
   (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil))
 
 ;; Language:
+
+;; GLSL
+(use-package glsl-mode
+  :ensure t
+  :mode ("\\.\\(vert\\|frag\\)\\'"))
+
+(use-package flycheck-glsl
+  :load-path "site-lisp/")
 
 ;; Markdown
 (use-package markdown-mode
@@ -654,14 +664,22 @@
  '(lsp-ui-doc-enable nil)
  '(lsp-ui-peek-enable nil)
  '(lsp-ui-sideline-enable nil)
+ '(lsp-use-native-json t)
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
-   '(flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ yaml-mode workgroups2 win-switch web-mode use-package stylus-mode solarized-theme smartparens rvm robe projectile magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
+   '(glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
  '(safe-local-variable-values
-   '((flycheck-gcc-include-path "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/user" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/kernel")
+   '((eval font-lock-add-keywords nil
+           `((,(concat "("
+                       (regexp-opt
+                        '("sp-do-move-op" "sp-do-move-cl" "sp-do-put-op" "sp-do-put-cl" "sp-do-del-op" "sp-do-del-cl")
+                        t)
+                       "\\_>")
+              1 'font-lock-variable-name-face)))
+     (flycheck-gcc-include-path "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/user" "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src/lib/kernel")
      (projectile-project-compilation-cmd . "go install")
      (flycheck-gcc-include-path . "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src")
      (projectile-project-name . "cs186-project")))

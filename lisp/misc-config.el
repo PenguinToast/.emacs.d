@@ -34,6 +34,7 @@
 ;; Theme stuff
 (defadvice load-theme (before theme-dont-propagate activate)
   (mapc #'disable-theme custom-enabled-themes))
+(setq-default show-trailing-whitespace t)
 
 (provide 'misc-config)
 ;;; misc-config.el ends here
