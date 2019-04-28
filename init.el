@@ -199,11 +199,6 @@
   :config
   (setq git-commit-fill-column 72))
 
-(use-package magit-gh-pulls
-  :ensure t
-  :config
-  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
-
 (use-package hydra
   :ensure t)
 
@@ -287,9 +282,7 @@
 (use-package dired
   :config
   (use-package dired-x
-    :bind ("C-x C-j" . dired-jump))
-  (use-package dired-details+
-    :ensure t))
+    :bind ("C-x C-j" . dired-jump)))
 
 (use-package ivy-xref
   :ensure t
@@ -671,7 +664,7 @@
  '(lsp-use-native-json t)
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
-   '(cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe magit-gh-pulls lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
+   '(cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
