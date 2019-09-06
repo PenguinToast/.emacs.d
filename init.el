@@ -137,6 +137,7 @@
   :ensure t
   :demand
   :bind (("C-s" . swiper)
+         ("C-r" . swiper-backward)
          ("C-c C-r" . ivy-resume))
   :config
   (ivy-mode 1)
@@ -198,6 +199,10 @@
   :bind ("C-x g" . magit-status)
   :config
   (setq git-commit-fill-column 72))
+
+(use-package forge
+  :ensure t
+  :after magit)
 
 (use-package hydra
   :ensure t)
@@ -275,6 +280,11 @@
   :ensure t
   :config
   (setq ag-highlight-search t))
+
+(use-package winnow
+  :ensure t
+  :after ag
+  :hook (ag-mode . winnow-mode))
 
 (use-package highlight-indentation
   :ensure t)
@@ -363,9 +373,11 @@
   :ensure t
   :config
   (require 'smartparens-python)
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
   (elpy-enable)
   ;; TODO: FIXME
-  (add-to-list 'flycheck-disabled-checkers 'python-flake8))
+  ;; (add-to-list 'flycheck-disabled-checkers 'python-flake8)
+  )
 
 ;; Ruby
 (use-package rvm
@@ -497,6 +509,7 @@
   (setq web-mode-content-types-alist
         '(("jsx"  . "/affinity/assets/javascripts/.*\\.js[x]?\\'")
           ("jsx"  . "/workspace/mobile/.*\\.js[x]?\\'")
+          ("jsx"  . "/workspace/scaleapi/.*\\.js[x]?\\'")
           ("json" . "\\.eslintrc\\'")
           ("underscorejs"  . ".*\\.tpl\\'")))
   (makunbound 'standard-indent)
@@ -515,6 +528,10 @@
               (set-fill-column 90)
               (setq show-trailing-whitespace t)
               (when (string-equal "tsx" (file-name-extension buffer-file-name))
+                (setup-tide-mode))
+              (when (string-equal "js" (file-name-extension buffer-file-name))
+                (setup-tide-mode))
+              (when (string-equal "jsx" (file-name-extension buffer-file-name))
                 (setup-tide-mode))
               )))
 
@@ -560,6 +577,8 @@
 (use-package org
   :ensure t
   :mode ("\\.org\\'" . org-mode)
+  :bind ("C-c l" . org-store-link)
+  :hook (org-mode . auto-fill-mode)
   :config
   (setq org-log-done t))
 
@@ -663,11 +682,13 @@
  '(lsp-ui-sideline-enable nil)
  '(lsp-use-native-json t)
  '(magit-diff-use-overlays nil)
+ '(org-export-backends '(ascii html icalendar latex md odt))
  '(package-selected-packages
    '(cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
+ '(python-shell-interpreter "python3")
  '(safe-local-variable-values
    '((eval font-lock-add-keywords nil
            `((,(concat "("
