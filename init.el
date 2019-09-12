@@ -34,6 +34,10 @@
   :load-path "lisp/"
   :hook (c-mode-common . google-set-c-style))
 
+(use-package magit-workgroups
+  :load-path "lisp/"
+  :after (magit projectile workgroups2))
+
 ;; site-lisp:
 (use-package revbufs
   :load-path "site-lisp/")
@@ -509,7 +513,7 @@
   (setq web-mode-content-types-alist
         '(("jsx"  . "/affinity/assets/javascripts/.*\\.js[x]?\\'")
           ("jsx"  . "/workspace/mobile/.*\\.js[x]?\\'")
-          ("jsx"  . "/workspace/scaleapi/.*\\.js[x]?\\'")
+          ("jsx"  . ".*/scaleapi/.*\\.js[x]?\\'")
           ("json" . "\\.eslintrc\\'")
           ("underscorejs"  . ".*\\.tpl\\'")))
   (makunbound 'standard-indent)
@@ -525,7 +529,7 @@
   (setq web-mode-enable-auto-pairing nil)
   (add-hook 'web-mode-hook
             (lambda ()
-              (set-fill-column 90)
+              (set-fill-column 100)
               (setq show-trailing-whitespace t)
               (when (string-equal "tsx" (file-name-extension buffer-file-name))
                 (setup-tide-mode))
@@ -676,6 +680,7 @@
  '(flycheck-gometalinter-vendor t)
  '(hl-sexp-background-color "#efebe9")
  '(inhibit-startup-screen t)
+ '(js-indent-level 2)
  '(lsp-prefer-flymake nil)
  '(lsp-ui-doc-enable nil)
  '(lsp-ui-peek-enable nil)
