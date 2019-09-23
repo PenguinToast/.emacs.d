@@ -57,8 +57,30 @@
     :ensure t))
 
 ;; Themes:
+(use-package all-the-icons
+  :ensure t)
+
+(use-package doom-themes
+  :ensure t
+  :config
+  (load-theme 'doom-solarized-light t)
+  (doom-themes-visual-bell-config)
+  (doom-themes-org-config))
+
+(use-package minions
+  :ensure t
+  :config (minions-mode 1))
+
+(use-package doom-modeline
+  :ensure t
+  :after minions workgroups2
+  :hook (after-init . doom-modeline-mode)
+  :config
+  ;; Needed for doom-modeline
+  (add-to-list 'global-mode-string '(t (:eval (wg-mode-line-string)))))
 
 (use-package solarized-theme
+  :disabled
   :ensure t)
 
 ;; This one was causing problems.
@@ -304,6 +326,7 @@
 
 (use-package lsp-mode
   :ensure t
+  :hook (typescript-mode . lsp)
   :commands lsp)
 
 (use-package lsp-ui
@@ -319,7 +342,8 @@
   :commands company-lsp
   :config
   (push 'company-lsp company-backends)
-  (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil))
+  ;; (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil)
+  )
 
 ;; Language:
 
@@ -377,6 +401,8 @@
   :ensure t
   :config
   (require 'smartparens-python)
+  (setq elpy-rpc-python-command "python3")
+  (setq python-shell-interpreter "python3")
   (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
   (elpy-enable)
   ;; TODO: FIXME
@@ -472,6 +498,7 @@
 
 (use-package tide
   :ensure t
+  :disabled
   :after (typescript-mode company flycheck)
   :hook ((typescript-mode . tide-setup)
          (typescript-mode . tide-hl-identifier-mode)
@@ -531,12 +558,16 @@
             (lambda ()
               (set-fill-column 100)
               (setq show-trailing-whitespace t)
-              (when (string-equal "tsx" (file-name-extension buffer-file-name))
-                (setup-tide-mode))
-              (when (string-equal "js" (file-name-extension buffer-file-name))
-                (setup-tide-mode))
-              (when (string-equal "jsx" (file-name-extension buffer-file-name))
-                (setup-tide-mode))
+              (when (seq-contains-p
+                     '("tsx", "js", "jsx")
+                     (file-name-extension buffer-file-name))
+                (lsp))
+              ;; (when (string-equal "tsx" (file-name-extension buffer-file-name))
+              ;;   (setup-tide-mode))
+              ;; (when (string-equal "js" (file-name-extension buffer-file-name))
+              ;;   (setup-tide-mode))
+              ;; (when (string-equal "jsx" (file-name-extension buffer-file-name))
+              ;;   (setup-tide-mode))
               )))
 
 (use-package prettier-js
@@ -649,9 +680,21 @@
   (add-hook 'c-mode-common-hook #'setup-flycheck-rtags)
   )
 
+;; Scale
+
 (use-package dockerfile-mode
   :ensure t
   :mode "Dockerfile\\'")
+
+(use-package terraform-mode
+  :ensure t
+  :mode "\\.tf\\'")
+
+(use-package company-terraform
+  :ensure t
+  :after terraform-mode
+  :init
+  (company-terraform-init))
 
 ;; Custom after
 
@@ -670,10 +713,10 @@
    [unspecified "#FFFFFF" "#d15120" "#5f9411" "#d2ad00" "#6b82a7" "#a66bab" "#6b82a7" "#505050"] t)
  '(ccls-executable "/home/william/package_src/ccls/Release/ccls")
  '(confirm-kill-emacs 'y-or-n-p)
- '(custom-enabled-themes '(solarized-light))
  '(custom-safe-themes
-   '("c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default))
+   '("d91ef4e714f05fff2070da7ca452980999f5361209e679ee988e3c432df24347" "c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default))
  '(dired-details-initially-hide nil)
+ '(elpy-rpc-python-command "/Users/williamsheu/Envs/elpy-rpc-venv/bin/python3")
  '(fci-rule-character-color "#d9d9d9")
  '(flycheck-gometalinter-fast t)
  '(flycheck-gometalinter-tests t)
@@ -684,16 +727,19 @@
  '(lsp-prefer-flymake nil)
  '(lsp-ui-doc-enable nil)
  '(lsp-ui-peek-enable nil)
- '(lsp-ui-sideline-enable nil)
+ '(lsp-ui-sideline-enable t)
+ '(lsp-ui-sideline-show-code-actions nil)
+ '(lsp-ui-sideline-show-diagnostics t)
  '(lsp-use-native-json t)
  '(magit-diff-use-overlays nil)
+ '(magit-refresh-verbose nil)
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(package-selected-packages
-   '(cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
+   '(minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
- '(python-shell-interpreter "python3")
+ '(python-indent-offset 4)
  '(safe-local-variable-values
    '((eval font-lock-add-keywords nil
            `((,(concat "("
@@ -715,4 +761,7 @@
  ;; If there is more than one, they won't work right.
  '(lsp-face-highlight-read ((t (:background "light coral"))))
  '(lsp-face-highlight-textual ((t (:background "burlywood"))))
- '(lsp-face-highlight-write ((t (:background "medium sea green")))))
+ '(lsp-face-highlight-write ((t (:background "medium sea green"))))
+ '(lsp-ui-sideline-current-symbol ((t (:foreground "#69B7F0" :box (:line-width -1 :color "#69B7F0") :weight ultra-bold :height 0.99))))
+ '(lsp-ui-sideline-global ((t (:background "#eee8d5"))))
+ '(lsp-ui-sideline-symbol ((t (:foreground "grey60" :box (:line-width -1 :color "grey60") :height 0.99)))))

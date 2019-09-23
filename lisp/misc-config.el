@@ -18,7 +18,7 @@
 (blink-cursor-mode 1)
 (setq-default fill-column 80)
 (set-face-attribute 'default nil :height 110)
-(setq vc-handled-backends (delq 'Git vc-handled-backends))
+;; (setq vc-handled-backends (delq 'Git vc-handled-backends))
 
 (recentf-mode 1)
 (setq recentf-max-menu-items 25)
