@@ -83,27 +83,6 @@
   :disabled
   :ensure t)
 
-;; This one was causing problems.
-(use-package twilight-bright-theme
-  :disabled
-  :ensure t)
-
-(use-package color-theme-sanityinc-tomorrow
-  :disabled
-  :ensure t)
-
-(use-package leuven-theme
-  :disabled
-  :ensure t)
-
-(use-package hemisu-theme
-  :disabled
-  :ensure t)
-
-(use-package material-theme
-  :disabled
-  :ensure t)
-
 ;; General:
 
 (use-package ibuffer
@@ -152,12 +131,6 @@
 
 (use-package fuzzy-match
   :ensure t)
-
-(use-package icicles
-  :ensure t
-  :disabled
-  :config
-  (icy-mode 1))
 
 (use-package ivy
   :ensure t
@@ -334,6 +307,8 @@
   :after lsp-mode
   :commands lsp-ui-mode
   :hook (lsp . lsp-ui-mode)
+  :config
+  (flycheck-add-next-checker 'lsp-ui 'javascript-eslint 'append)
   )
 
 (use-package company-lsp
@@ -549,11 +524,11 @@
   (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-ternary" . nil))
-  (setq web-mode-markup-indent-offset tab-width)
-  (setq web-mode-css-indent-offset tab-width)
-  (setq web-mode-code-indent-offset tab-width)
-  (setq web-mode-attr-indent-offset tab-width)
-  (setq web-mode-enable-auto-pairing nil)
+  (setq-default web-mode-markup-indent-offset tab-width)
+  (setq-default web-mode-css-indent-offset tab-width)
+  (setq-default web-mode-code-indent-offset tab-width)
+  (setq-default web-mode-attr-indent-offset tab-width)
+  (setq-default web-mode-enable-auto-pairing nil)
   (add-hook 'web-mode-hook
             (lambda ()
               (set-fill-column 100)
@@ -684,11 +659,12 @@
 
 (use-package dockerfile-mode
   :ensure t
-  :mode "Dockerfile\\'")
+  :mode "Dockerfile")
 
 (use-package terraform-mode
   :ensure t
-  :mode "\\.tf\\'")
+  :mode "\\.tf\\'"
+  :hook (terraform-mode . terraform-format-on-save-mode))
 
 (use-package company-terraform
   :ensure t
@@ -718,13 +694,16 @@
  '(dired-details-initially-hide nil)
  '(elpy-rpc-python-command "/Users/williamsheu/Envs/elpy-rpc-venv/bin/python3")
  '(fci-rule-character-color "#d9d9d9")
+ '(flycheck-disabled-checkers '(python-pycompile))
  '(flycheck-gometalinter-fast t)
  '(flycheck-gometalinter-tests t)
  '(flycheck-gometalinter-vendor t)
+ '(flycheck-python-flake8-executable "/Users/williamsheu/Envs/elpy-rpc-venv/bin/python3")
  '(hl-sexp-background-color "#efebe9")
  '(inhibit-startup-screen t)
  '(js-indent-level 2)
  '(lsp-prefer-flymake nil)
+ '(lsp-restart 'auto-restart)
  '(lsp-ui-doc-enable nil)
  '(lsp-ui-peek-enable nil)
  '(lsp-ui-sideline-enable t)
@@ -759,9 +738,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(lsp-face-highlight-read ((t (:background "light coral"))))
- '(lsp-face-highlight-textual ((t (:background "burlywood"))))
- '(lsp-face-highlight-write ((t (:background "medium sea green"))))
  '(lsp-ui-sideline-current-symbol ((t (:foreground "#69B7F0" :box (:line-width -1 :color "#69B7F0") :weight ultra-bold :height 0.99))))
  '(lsp-ui-sideline-global ((t (:background "#eee8d5"))))
  '(lsp-ui-sideline-symbol ((t (:foreground "grey60" :box (:line-width -1 :color "grey60") :height 0.99)))))
+(put 'upcase-region 'disabled nil)
