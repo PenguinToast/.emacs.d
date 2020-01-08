@@ -128,4 +128,3 @@ alias emacsc="emacsclient -c -a emacs"           # new - opens the GUI with
 
 alias tmux="tmux -2"
 
-source "$HOME/.rvm/scripts/rvm"
