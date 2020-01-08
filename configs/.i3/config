@@ -237,3 +237,4 @@ bindsym --release Shift+Print exec shutter -w
 
 exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png
 exec --no-startup-id xset s off
+exec --no-startup-id xset r rate 300 35 # Set initial delay 300ms, repeat 35ms
