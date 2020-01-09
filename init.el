@@ -467,6 +467,7 @@
 
 ;; Web
 (use-package typescript-mode
+  :ensure t
   :mode ("\\.ts\\'")
   :config
   (setq-default typescript-indent-level 2))
