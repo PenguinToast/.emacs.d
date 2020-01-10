@@ -165,6 +165,7 @@ bindsym $mod+c move workspace to output right
 workspace_auto_back_and_forth yes
 
 exec_always xmodmap ~/.xmodmap
+exec_always xset r rate 300 35 # Set initial delay 300ms, repeat 35ms
 
 exec --no-startup-id nm-applet
 exec --no-startup-id udiskie --tray
@@ -191,7 +192,7 @@ assign [class="Slack"] 14:slack
 # Autostart applications
 exec --no-startup-id i3-msg 'workspace 11:term; exec i3-sensible-terminal'
 exec --no-startup-id i3-msg 'workspace 12:emacs; exec emacs'
-# exec --no-startup-id i3-msg 'workspace 14:slack; exec slack'
+exec --no-startup-id i3-msg 'workspace 14:slack; exec slack'
 exec --no-startup-id i3-msg 'workspace 13:web; exec google-chrome'
 exec --no-startup-id i3-msg 'workspace 1'
 
@@ -237,4 +238,3 @@ bindsym --release Shift+Print exec shutter -w
 
 exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png
 exec --no-startup-id xset s off
-exec --no-startup-id xset r rate 300 35 # Set initial delay 300ms, repeat 35ms
