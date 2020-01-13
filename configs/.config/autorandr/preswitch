@@ -1,0 +1,5 @@
+#!/bin/bash
+
+current_profile_dir=$(dirname "${AUTORANDR_PROFILE_FOLDER}")/$(autorandr --current)
+i3-msg -t get_workspaces > "${current_profile_dir}/window_config"
+echo "Saving ${current_profile_dir}/window_config"

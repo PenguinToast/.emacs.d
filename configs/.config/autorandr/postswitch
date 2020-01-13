@@ -1,0 +1,16 @@
+#!/bin/bash
+
+xset r rate 300 35
+xmodmap ~/.xmodmap
+
+# Restore monitor assignments
+config_file="${AUTORANDR_PROFILE_FOLDER}/window_config"
+if [ -f "${config_file}" ]; then
+    echo "Restoring ${AUTORANDR_PROFILE_FOLDER}/window_config"
+    cat "${config_file}" \
+        | jq -r '.[] | .name, .output' \
+        | xargs -L 2 bash -xc 'i3-msg [workspace="^$1\$"] move workspace to output "$2" > /dev/null' bash
+    cat "${config_file}" \
+        | jq -r '.[] | select(.visible==true) | .name' \
+        | xargs bash -xc 'i3-msg [workspace="^$1\$"] focus > /dev/null' bash
+fi
