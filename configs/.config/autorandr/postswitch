@@ -12,5 +12,5 @@ if [ -f "${config_file}" ]; then
         | xargs -L 2 bash -xc 'i3-msg [workspace="^$1\$"] move workspace to output "$2" > /dev/null' bash
     cat "${config_file}" \
         | jq -r '.[] | select(.visible==true) | .name' \
-        | xargs bash -xc 'i3-msg [workspace="^$1\$"] focus > /dev/null' bash
+        | xargs -L 1 bash -xc 'i3-msg [workspace="^$1\$"] focus > /dev/null' bash
 fi
