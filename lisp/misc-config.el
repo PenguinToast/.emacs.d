@@ -15,6 +15,7 @@
 (setq-default tab-width 2)
 (defvaralias 'c-basic-offset 'tab-width)
 (defvaralias 'cperl-indent-level 'tab-width)
+(defvaralias 'sh-basic-offset 'tab-width)
 (blink-cursor-mode 1)
 (setq-default fill-column 80)
 (set-face-attribute 'default nil :height 110)
