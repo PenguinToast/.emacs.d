@@ -18,7 +18,13 @@ if [[ -n "${TMUX}" ]]; then
     mkdir -p "$HOME/.tmux/history"
     tmux_pane=$(tmux display-message -t $TMUX_PANE -p  "#I_#P")
     export HISTFILE="$HOME/.tmux/history/pane_${tmux_pane}.hist"
-    export PROMPT_COMMAND="$PROMPT_COMMAND; history -a"
+
+    if [[ -n "${PROMPT_COMMAND}" ]]; then
+        export PROMPT_COMMAND="$PROMPT_COMMAND; history -a"
+    else
+        export PROMPT_COMMAND="history -a"
+    fi
+
     history -c
     history -r
 fi
