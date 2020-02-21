@@ -320,6 +320,22 @@
   ;; (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil)
   )
 
+(use-package lsp-ivy
+  :ensure t
+  :after (lsp-mode)
+  :commands (lsp-ivy-workspace-symbol lsp-ivy-global-workspace-symbol))
+
+(use-package origami
+  :ensure t
+  :hook (lsp-mode . origami-mode)
+  :bind (:map origami-mode-map
+              ("C-<tab>" . origami-recursively-toggle-node)))
+
+(use-package lsp-origami
+  :ensure t
+  :after (lsp-mode origami)
+  :hook (lsp-mode . lsp-origami-mode))
+
 ;; Language:
 
 ;; GLSL
@@ -689,13 +705,13 @@
  '(custom-safe-themes
    '("d91ef4e714f05fff2070da7ca452980999f5361209e679ee988e3c432df24347" "c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default))
  '(dired-details-initially-hide nil)
- '(elpy-rpc-python-command "/Users/williamsheu/Envs/elpy-rpc-venv/bin/python3")
+ '(elpy-rpc-python-command "/home/william/envs/elpy-rpc-venv/bin/python3")
  '(fci-rule-character-color "#d9d9d9")
  '(flycheck-disabled-checkers '(python-pycompile))
  '(flycheck-gometalinter-fast t)
  '(flycheck-gometalinter-tests t)
  '(flycheck-gometalinter-vendor t)
- '(flycheck-python-flake8-executable "/Users/williamsheu/Envs/elpy-rpc-venv/bin/python3")
+ '(flycheck-python-flake8-executable "/home/william/envs/elpy-rpc-venv/bin/python3")
  '(hl-sexp-background-color "#efebe9")
  '(inhibit-startup-screen t)
  '(js-indent-level 2)
@@ -711,7 +727,7 @@
  '(magit-refresh-verbose nil)
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(package-selected-packages
-   '(minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
+   '(lsp-origami origami lsp-ivy minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
