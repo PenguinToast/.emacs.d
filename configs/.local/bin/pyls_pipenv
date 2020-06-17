@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PYLS="$(pipenv --venv 2>/dev/null)/bin/pyls"
+if ! [[ -x "$PYLS" ]]; then
+  PYLS="pyls"
+fi
+
+$PYLS $@

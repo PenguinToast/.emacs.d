@@ -105,5 +105,44 @@ current buffer's, reload dir-locals."
 
 (global-set-key "\C-co" 'switch-to-minibuffer) ;; Bind to `C-c o'
 
+(defun willsheu/lsp-get-pipenv-environment (orig-fun &rest args)
+  "Return the venv folder using pipenv."
+  (if-let* ((pipenv-command-path (executable-find "pipenv"))
+            (python-env (let ((process-environment
+                               (append '("WORKON_HOME=/home/william/envs"
+                                         "LC_ALL=C.UTF-8"
+                                         "LANG=C.UTF-8")
+                                     process-environment)))
+                          (condition-case nil
+                              (car (process-lines pipenv-command-path "--venv"))
+                            (error nil)))))
+      (progn
+        (lsp--info "Found pipenv environment: %s" python-env)
+        python-env)
+    (progn
+      (lsp--warn "Couldn't find pipenv environment")
+      (apply orig-fun args))))
+
+(defun willsheu/lsp-get-pipenv-pyls-command ()
+  "Return the pyls in pipenv, or default."
+  (if-let* ((python-env (lsp-pyls-get-pyenv-environment))
+            (pyls-command (concat (file-name-as-directory python-env) "bin/pyls"))
+            (pyls-executable (file-executable-p pyls-command)))
+      pyls-command
+      lsp-pyls-server-command))
+
+(defun willsheu/lsp-pyls-setup ()
+  "Do setup to customize lsp-pyls."
+  (advice-add 'lsp-pyls-get-pyenv-environment :around 'willsheu/lsp-get-pipenv-environment)
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection 'willsheu/lsp-get-pipenv-pyls-command)
+                    :major-modes '(python-mode cython-mode)
+                    :priority 1
+                    :server-id 'pyls-pipenv
+                    :library-folders-fn (lambda (_workspace) lsp-clients-python-library-directories)
+                    :initialized-fn (lambda (workspace)
+                                      (with-lsp-workspace workspace
+                                        (lsp--set-configuration (lsp-configuration-section "pyls")))))))
+
 (provide 'my-functions)
 ;;; my-functions.el ends here

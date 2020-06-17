@@ -122,6 +122,11 @@
     :ensure t)
   )
 
+(use-package company-box
+  :ensure t
+  :after company
+  :hook (company-mode . company-box-mode))
+
 (use-package projectile
   :ensure t
   :config
@@ -264,6 +269,7 @@
   :config
   (require 'smartparens-config)
   (require 'smartparens-lua)
+  (require 'smartparens-python)
   (smartparens-global-mode)
   (show-smartparens-global-mode t)
   (add-hook 'minibuffer-setup-hook 'turn-on-smartparens-strict-mode)
@@ -299,8 +305,18 @@
 
 (use-package lsp-mode
   :ensure t
-  :hook (typescript-mode . lsp)
-  :commands lsp)
+  :hook ((typescript-mode . lsp)
+         (python-mode . lsp)
+         (go-mode . lsp)
+         (terraform-mode . lsp)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp
+  :bind-keymap
+  ("C-c l" . lsp-command-map)
+  :config
+  (willsheu/lsp-pyls-setup)
+  (setq lsp-keymap-prefix "C-c l")
+  )
 
 (use-package lsp-ui
   :ensure t
@@ -308,7 +324,7 @@
   :commands lsp-ui-mode
   :hook (lsp . lsp-ui-mode)
   :config
-  (flycheck-add-next-checker 'lsp-ui 'javascript-eslint 'append)
+  (flycheck-add-next-checker 'lsp 'javascript-eslint 'append)
   )
 
 (use-package company-lsp
@@ -335,6 +351,11 @@
   :ensure t
   :after (lsp-mode origami)
   :hook (lsp-mode . lsp-origami-mode))
+
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
 
 ;; Language:
 
@@ -387,11 +408,15 @@
   :mode ("\\.\\(l\\|y\\)\\'"))
 
 ;; Python
+;; (defun willsheu/pipenv-pyls-location ()
+;;   (message lsp--cur-workspace)
+;;   "pyls")
+
 (use-package elpy
   :pin elpy
+  :disabled
   :ensure t
   :config
-  (require 'smartparens-python)
   (setq elpy-rpc-python-command "python3")
   (setq python-shell-interpreter "python3")
   (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
@@ -399,6 +424,12 @@
   ;; TODO: FIXME
   ;; (add-to-list 'flycheck-disabled-checkers 'python-flake8)
   )
+
+(use-package pipenv
+  :ensure t
+  :init
+  (setq pipenv-with-flycheck nil)
+  (setq pipenv-with-projectile nil))
 
 ;; Ruby
 (use-package rvm
@@ -604,7 +635,7 @@
 (use-package org
   :ensure t
   :mode ("\\.org\\'" . org-mode)
-  :bind ("C-c l" . org-store-link)
+  ;; :bind ("C-c l" . org-store-link)
   :hook (org-mode . auto-fill-mode)
   :config
   (setq org-log-done t))
@@ -612,13 +643,17 @@
 (use-package go-mode
   :ensure t
   :mode "\\.go\\'"
-  :bind (:map go-mode-map
-              ("M-." . godef-jump))
+  ;; :bind (:map go-mode-map
+  ;;             ("M-." . godef-jump))
   :config
-  (add-hook
-   `go-mode-hook
-   (lambda ()
-     (setq-local indent-tabs-mode t)))
+  (defun lsp-go-install-save-hooks ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t))
+  (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+  ;; (add-hook
+  ;;  `go-mode-hook
+  ;;  (lambda ()
+  ;;    (setq-local indent-tabs-mode t)))
   )
 
 (use-package antlr-mode
@@ -685,6 +720,7 @@
 
 (use-package company-terraform
   :ensure t
+  :disabled
   :after terraform-mode
   :init
   (company-terraform-init))
@@ -701,21 +737,22 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ccls-executable "/home/william/package_src/ccls/Release/ccls")
+ '(comment-multi-line t)
  '(confirm-kill-emacs 'y-or-n-p)
  '(custom-safe-themes
    '("d91ef4e714f05fff2070da7ca452980999f5361209e679ee988e3c432df24347" "c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default))
  '(dired-details-initially-hide nil)
  '(elpy-rpc-python-command "/home/william/envs/elpy-rpc-venv/bin/python3")
  '(fci-rule-character-color "#d9d9d9")
- '(flycheck-disabled-checkers '(python-pycompile))
+ '(flycheck-disabled-checkers '(python-pycompile python-mypy))
  '(flycheck-gometalinter-fast t)
  '(flycheck-gometalinter-tests t)
  '(flycheck-gometalinter-vendor t)
- '(flycheck-python-flake8-executable "/home/william/envs/elpy-rpc-venv/bin/python3")
  '(hl-sexp-background-color "#efebe9")
  '(inhibit-startup-screen t)
  '(js-indent-level 2)
  '(lsp-prefer-flymake nil)
+ '(lsp-pyls-server-command '("pyls_pipenv"))
  '(lsp-restart 'auto-restart)
  '(lsp-ui-doc-enable nil)
  '(lsp-ui-peek-enable nil)
@@ -727,13 +764,14 @@
  '(magit-refresh-verbose nil)
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(package-selected-packages
-   '(lsp-origami origami lsp-ivy minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
+   '(company-box which-key pipenv lsp-origami origami lsp-ivy minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
  '(python-indent-offset 4)
  '(safe-local-variable-values
-   '((eval font-lock-add-keywords nil
+   '((flycheck-disabled-checkers emacs-lisp-checkdoc)
+     (eval font-lock-add-keywords nil
            `((,(concat "("
                        (regexp-opt
                         '("sp-do-move-op" "sp-do-move-cl" "sp-do-put-op" "sp-do-put-cl" "sp-do-del-op" "sp-do-del-cl")
