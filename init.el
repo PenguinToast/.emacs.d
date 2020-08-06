@@ -123,6 +123,7 @@
   )
 
 (use-package company-box
+  :disabled
   :ensure t
   :after company
   :hook (company-mode . company-box-mode))
@@ -315,6 +316,7 @@
   ("C-c l" . lsp-command-map)
   :config
   (willsheu/lsp-pyls-setup)
+  (willsheu/lsp-ts-ls-setup)
   (setq lsp-keymap-prefix "C-c l")
   )
 

@@ -192,7 +192,7 @@ assign [class="Slack"] 14:slack
 # Autostart applications
 exec --no-startup-id i3-msg 'workspace 11:term; exec i3-sensible-terminal'
 exec --no-startup-id i3-msg 'workspace 12:emacs; exec emacs'
-exec --no-startup-id i3-msg 'workspace 14:slack; exec slack'
+# exec --no-startup-id i3-msg 'workspace 14:slack; exec slack'
 exec --no-startup-id i3-msg 'workspace 13:web; exec google-chrome'
 exec --no-startup-id i3-msg 'workspace 1'
 

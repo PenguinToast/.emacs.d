@@ -144,5 +144,25 @@ current buffer's, reload dir-locals."
                                       (with-lsp-workspace workspace
                                         (lsp--set-configuration (lsp-configuration-section "pyls")))))))
 
+(defun willsheu/lsp-ts-ls-setup ()
+  "Do setup to give more RAM to tsls"
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection (lambda ()
+                                                            `(,(lsp-package-path 'typescript-language-server)
+                                                              "--tsserver-path"
+                                                              ,(lsp-package-path 'typescript)
+                                                              ,@lsp-clients-typescript-server-args)))
+                    :activation-fn 'lsp-typescript-javascript-tsx-jsx-activate-p
+                    :priority 0
+                    :environment-fn (lambda ()
+                                      '(("NODE_OPTIONS" . "--max_old_space_size=4096")))
+                    :completion-in-comments? t
+                    :initialization-options (lambda ()
+                                              (list :plugins lsp-clients-typescript-plugins
+                                                    :logVerbosity lsp-clients-typescript-log-verbosity
+                                                    :tsServerPath (lsp-package-path 'typescript)))
+                    :ignore-messages '("readFile .*? requested by TypeScript but content not available")
+                    :server-id 'ts-ls-2)))
+
 (provide 'my-functions)
 ;;; my-functions.el ends here

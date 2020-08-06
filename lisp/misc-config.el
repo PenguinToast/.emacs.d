@@ -18,7 +18,7 @@
 (defvaralias 'sh-basic-offset 'tab-width)
 (blink-cursor-mode 1)
 (setq-default fill-column 80)
-(set-face-attribute 'default nil :height 110)
+(set-face-attribute 'default nil :height 100)
 ;; (setq vc-handled-backends (delq 'Git vc-handled-backends))
 
 (recentf-mode 1)
