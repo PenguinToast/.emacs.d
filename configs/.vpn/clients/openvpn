@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+USAGE="Usage: $0 (up|down|status|help) [connection]"
+
+if [ "$#" != "2" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+# ensure running as root
+if [ "$(id -u)" != "0" ]; then
+  exec sudo "$0" "$@"
+fi
+
+case "$1" in
+'up')
+  systemctl start openvpn-client@"$2"
+  ;;
+'down')
+  systemctl stop openvpn-client@"$2"
+  ;;
+'status')
+  status=$(systemctl -p ActiveState --value show openvpn-client@"$2")
+  if [ "$status" == "active" ]; then
+    echo "up"
+  else
+    echo "down"
+  fi
+  ;;
+'help')
+  echo "$USAGE"
+  exit 1
+  ;;
+esac

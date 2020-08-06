@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+USAGE="Usage: $0 (up|down|status|help) [connection]"
+
+if [ "$#" != "2" ]; then
+	echo "$USAGE"
+	exit 1
+fi
+
+case "$1" in
+'up')
+  nmcli c up "$2"
+  ;;
+'down')
+  nmcli c down "$2"
+  ;;
+'status')
+  status=$(nmcli -g GENERAL.STATE c show "$2")
+  if [ "$status" == "activated" ]; then
+    echo "up"
+  else
+    echo "down"
+  fi
+  ;;
+'help')
+  echo "$USAGE"
+  exit 1
+  ;;
+esac
