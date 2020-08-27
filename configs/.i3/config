@@ -188,6 +188,7 @@ bindsym $mod+Shift+z move container to workspace 14:slack
 assign [class="Emacs"] 12:emacs
 assign [class="Google-chrome"] 13:web
 assign [class="Slack"] 14:slack
+assign [class="zoom"] 4
 
 # Autostart applications
 exec --no-startup-id i3-msg 'workspace 11:term; exec i3-sensible-terminal'
