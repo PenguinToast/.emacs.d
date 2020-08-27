@@ -9,10 +9,13 @@ import os.path
 import argparse
 from enum import Enum
 import subprocess
+import notify2
+import time
 
 BASE_DIR = os.path.join(str(Path.home()), '.vpn/')
 CLIENTS_DIR = os.path.join(BASE_DIR, 'clients/')
 CONNECTIONS_DIR = os.path.join(BASE_DIR, 'connections/')
+SWITCH_TIMEOUT = 10
 
 
 def get_yubikey_token() -> str:
@@ -114,9 +117,11 @@ class Connection:
 
 
 class VpnSwitcher:
-    def __init__(self):
+    def __init__(self, switch_timeout=SWITCH_TIMEOUT):
         self.clients = self.create_clients()
         self.connections = self.create_connections(self.clients)
+        self.switch_timeout = switch_timeout
+        notify2.init('VPN Switcher')
 
     def create_clients(self) -> Mapping[str, Client]:
         client_files = os.listdir(CLIENTS_DIR)
@@ -154,8 +159,21 @@ class VpnSwitcher:
         if connection.status() == ConnectionStatus.Up:
             print(f'Connection {connection_name} already up, skipping')
             return
+
+        start_time = time.time()
         print(f'Activating Connection {connection_name}')
         connection.up()
+
+        while (connection.status() != ConnectionStatus.Up
+               and time.time() - start_time < self.switch_timeout):
+            time.sleep(0.1)
+
+        if connection.status() == ConnectionStatus.Up:
+            notification_message = 'Connection Succeeded'
+        else:
+            notification_message = 'Connection Failed'
+        notification = notify2.Notification(f'{connection_name} VPN', notification_message)
+        notification.show()
 
 
 def main():
