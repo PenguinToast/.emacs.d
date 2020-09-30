@@ -105,6 +105,50 @@ current buffer's, reload dir-locals."
 
 (global-set-key "\C-co" 'switch-to-minibuffer) ;; Bind to `C-c o'
 
+;; Taken from https://github.com/emacs-lsp/lsp-mode/pull/161/files#diff-89805084d36a788cb21a777663a63538R359
+(defun willsheu/merge-plists (first &rest rest)
+  "Deeply merge plists.
+FIRST is the plist to be merged into. The rest of the arguments
+can be either plists or nil. The non-nil plists in the rest of
+the arguments will be merged into FIRST.
+Return the merged plist."
+  (cl-assert (listp first))
+  (seq-each (lambda (pl)
+              (setq first
+                (willsheu/merge-two-plists first pl)))
+    rest)
+  first)
+
+(defun willsheu/merge-two-plists (first second)
+  "Deeply merge two plists.
+All values in SECOND are merged into FIRST. FIRST can be nil or a
+plist. SECOND must be a plist.
+Return the merged plist."
+  (when second
+    (if (not (listp second))
+      (warn "Cannot merge non-list value into a plist. The value is %s" second)
+      (cl-loop for (key second-value) on second
+        collect (progn
+                  (let ((first-value (plist-get first key))
+                         merged-value)
+                    (cond
+                      ((null second-value)) ; do nothing
+                      ((null first-value)
+                        (if (listp second-value)
+                          ;; Deep copy second-value so that the original value won't
+                          ;; be modified.
+                          (setq merged-value
+                            (willsheu/merge-two-plists nil second-value)))
+                        (setq merged-value second-value))
+                      ((and (listp first-value) (listp second-value))
+                        (setq merged-value (willsheu/merge-two-plists first-value second-value)))
+                      ;; Otherwise, the first value is a leaf entry and should
+                      ;; not be overridden.
+                      )
+                    (when merged-value
+                      (setq first (plist-put first key merged-value))))))))
+  first)
+
 (defun willsheu/lsp-get-pipenv-environment (orig-fun &rest args)
   "Return the venv folder using pipenv."
   (if-let* ((pipenv-command-path (executable-find "pipenv"))
@@ -145,7 +189,7 @@ current buffer's, reload dir-locals."
                                         (lsp--set-configuration (lsp-configuration-section "pyls")))))))
 
 (defun willsheu/lsp-ts-ls-setup ()
-  "Do setup to give more RAM to tsls"
+  "Do setup to give more RAM to tsls."
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection (lambda ()
                                                             `(,(lsp-package-path 'typescript-language-server)
@@ -165,15 +209,13 @@ current buffer's, reload dir-locals."
                     :server-id 'ts-ls-2)))
 
 (defun willsheu/lsp-modify-rust-init (base)
-  "Modify init plist"
-  (plist-put
-   base :diagnostics
-   (plist-put
-    (plist-get base :diagnostics) :disabled
-    ["unresolved-import"])))
+  "Modify init plist.
+BASE is the original init plist."
+  (willsheu/merge-plists
+   base '(:diagnostics (:disabled ["unresolved-import"]))))
 
 (defun willsheu/lsp-rust-setup ()
-  "Do setup to customize rust-analyzer"
+  "Do setup to customize rust-analyzer."
   (advice-add 'lsp-rust-analyzer--make-init-options :filter-return 'willsheu/lsp-modify-rust-init))
 
 (provide 'my-functions)
