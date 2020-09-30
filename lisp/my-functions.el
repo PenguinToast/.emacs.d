@@ -164,5 +164,17 @@ current buffer's, reload dir-locals."
                     :ignore-messages '("readFile .*? requested by TypeScript but content not available")
                     :server-id 'ts-ls-2)))
 
+(defun willsheu/lsp-modify-rust-init (base)
+  "Modify init plist"
+  (plist-put
+   base :diagnostics
+   (plist-put
+    (plist-get base :diagnostics) :disabled
+    ["unresolved-import"])))
+
+(defun willsheu/lsp-rust-setup ()
+  "Do setup to customize rust-analyzer"
+  (advice-add 'lsp-rust-analyzer--make-init-options :filter-return 'willsheu/lsp-modify-rust-init))
+
 (provide 'my-functions)
 ;;; my-functions.el ends here

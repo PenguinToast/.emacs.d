@@ -219,6 +219,7 @@
 
 (use-package smartparens
   :ensure t
+  :defer 1
   :init
   (defhydra smartparens-hydra ()
     "Smartparens"
@@ -315,6 +316,7 @@
          (python-mode . lsp)
          (go-mode . lsp)
          (terraform-mode . lsp)
+         (rust-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp
   :bind-keymap
@@ -322,6 +324,7 @@
   :config
   (willsheu/lsp-pyls-setup)
   (willsheu/lsp-ts-ls-setup)
+  (willsheu/lsp-rust-setup)
   (setq lsp-keymap-prefix "C-c l")
   )
 
@@ -413,6 +416,13 @@
 (use-package bison-mode
   :ensure
   :mode ("\\.\\(l\\|y\\)\\'"))
+
+;; Rust
+(use-package rust-mode
+  :ensure
+  :mode ("\\.rs\\'")
+  :config
+  (setq rust-format-on-save t))
 
 ;; Python
 ;; (defun willsheu/pipenv-pyls-location ()
@@ -761,6 +771,9 @@
  '(lsp-prefer-flymake nil)
  '(lsp-pyls-server-command '("pyls_pipenv"))
  '(lsp-restart 'auto-restart)
+ '(lsp-rust-analyzer-cargo-load-out-dirs-from-check t)
+ '(lsp-rust-analyzer-proc-macro-enable t)
+ '(lsp-rust-server 'rust-analyzer)
  '(lsp-ui-doc-enable nil)
  '(lsp-ui-peek-enable nil)
  '(lsp-ui-sideline-enable t)
@@ -771,7 +784,7 @@
  '(magit-refresh-verbose nil)
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(package-selected-packages
-   '(git-link company-box which-key pipenv lsp-origami origami lsp-ivy minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
+   '(rust-mode git-link company-box which-key pipenv lsp-origami origami lsp-ivy minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
