@@ -8,8 +8,8 @@
 (add-to-list 'package-archives
 	     '("elpy" . "http://jorgenschaefer.github.io/packages/"))
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-(add-to-list 'package-archives
-	     '("marmalade" . "http://marmalade-repo.org/packages/"))
+;; (add-to-list 'package-archives
+;; 	     '("marmalade" . "http://marmalade-repo.org/packages/"))
 
 ; (package-initialize)
 
@@ -299,7 +299,9 @@
   :hook (ag-mode . winnow-mode))
 
 (use-package highlight-indentation
-  :ensure t)
+  :ensure t
+  :hook ((yaml-mode . highlight-indentation-mode)
+         (yaml-mode . highlight-indentation-current-column-mode)))
 
 (use-package dired
   :config
@@ -334,7 +336,7 @@
   :commands lsp-ui-mode
   :hook (lsp . lsp-ui-mode)
   :config
-  (flycheck-add-next-checker 'lsp 'javascript-eslint 'append)
+  (flycheck-add-next-checker 'lsp 'javascript-eslint)
   )
 
 (use-package company-lsp
@@ -447,6 +449,11 @@
   :init
   (setq pipenv-with-flycheck nil)
   (setq pipenv-with-projectile nil))
+
+(use-package python-black
+  :ensure t
+  :after python
+  :hook (python-mode . python-black-on-save-mode))
 
 ;; Ruby
 (use-package rvm
@@ -589,10 +596,14 @@
   (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-ternary" . nil))
-  (setq-default web-mode-markup-indent-offset tab-width)
-  (setq-default web-mode-css-indent-offset tab-width)
-  (setq-default web-mode-code-indent-offset tab-width)
-  (setq-default web-mode-attr-indent-offset tab-width)
+  (makunbound 'web-mode-markup-indent-offset)
+  (defvaralias 'web-mode-markup-indent-offset 'tab-width)
+  (makunbound 'web-mode-css-indent-offset)
+  (defvaralias 'web-mode-css-indent-offset 'tab-width)
+  (makunbound 'web-mode-code-indent-offset)
+  (defvaralias 'web-mode-code-indent-offset 'tab-width)
+  (makunbound 'web-mode-attr-indent-offset)
+  (defvaralias 'web-mode-attr-indent-offset 'tab-width)
   (setq-default web-mode-enable-auto-pairing nil)
   (add-hook 'web-mode-hook
             (lambda ()
@@ -788,6 +799,7 @@
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
+ '(python-black-extra-args '("-l" "100"))
  '(python-indent-offset 4)
  '(safe-local-variable-values
    '((flycheck-disabled-checkers emacs-lisp-checkdoc)
@@ -809,6 +821,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(highlight-indentation-current-column-face ((t (:background "#c3b3b3"))))
  '(lsp-ui-sideline-current-symbol ((t (:foreground "#69B7F0" :box (:line-width -1 :color "#69B7F0") :weight ultra-bold :height 0.99))))
  '(lsp-ui-sideline-global ((t (:background "#eee8d5"))))
  '(lsp-ui-sideline-symbol ((t (:foreground "grey60" :box (:line-width -1 :color "grey60") :height 0.99)))))
