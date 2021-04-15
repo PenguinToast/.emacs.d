@@ -335,8 +335,6 @@
   :after lsp-mode
   :commands lsp-ui-mode
   :hook (lsp . lsp-ui-mode)
-  :config
-  (flycheck-add-next-checker 'lsp 'javascript-eslint)
   )
 
 (use-package company-lsp
@@ -583,6 +581,17 @@
          "\\.json\\'"
          "\\.eslintrc\\'"
          "\\.tsx\\'")
+  :init
+  (makunbound 'standard-indent)
+  (defvaralias 'standard-indent 'tab-width)
+  (unintern 'web-mode-markup-indent-offset)
+  (defvaralias 'web-mode-markup-indent-offset 'tab-width)
+  (unintern 'web-mode-css-indent-offset)
+  (defvaralias 'web-mode-css-indent-offset 'tab-width)
+  (unintern 'web-mode-code-indent-offset)
+  (defvaralias 'web-mode-code-indent-offset 'tab-width)
+  (unintern 'web-mode-attr-indent-offset)
+  (defvaralias 'web-mode-attr-indent-offset 'tab-width)
   :config
   (setq web-mode-content-types-alist
         '(("jsx"  . "/affinity/assets/javascripts/.*\\.js[x]?\\'")
@@ -590,20 +599,10 @@
           ("jsx"  . ".*/scaleapi/.*\\.js[x]?\\'")
           ("json" . "\\.eslintrc\\'")
           ("underscorejs"  . ".*\\.tpl\\'")))
-  (makunbound 'standard-indent)
-  (defvaralias 'standard-indent 'tab-width)
   (add-to-list 'web-mode-indentation-params '("lineup-args" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
   (add-to-list 'web-mode-indentation-params '("lineup-ternary" . nil))
-  (makunbound 'web-mode-markup-indent-offset)
-  (defvaralias 'web-mode-markup-indent-offset 'tab-width)
-  (makunbound 'web-mode-css-indent-offset)
-  (defvaralias 'web-mode-css-indent-offset 'tab-width)
-  (makunbound 'web-mode-code-indent-offset)
-  (defvaralias 'web-mode-code-indent-offset 'tab-width)
-  (makunbound 'web-mode-attr-indent-offset)
-  (defvaralias 'web-mode-attr-indent-offset 'tab-width)
   (setq-default web-mode-enable-auto-pairing nil)
   (add-hook 'web-mode-hook
             (lambda ()
@@ -756,6 +755,7 @@
 ;; Custom after
 
 (use-package my-flycheck-checkers
+  :after (flycheck)
   :load-path "lisp/")
 
 ;;; init.el ends here
@@ -799,7 +799,6 @@
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
- '(python-black-extra-args '("-l" "100"))
  '(python-indent-offset 4)
  '(safe-local-variable-values
    '((flycheck-disabled-checkers emacs-lisp-checkdoc)
