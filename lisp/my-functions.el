@@ -1,4 +1,7 @@
 ;;; my-functions.el --- Custom interactive functions.
+
+;; Author: PenguinToast <sheu.william@gmail.com>
+
 ;;; Commentary:
 
 ;;; Code:
@@ -156,7 +159,7 @@ Return the merged plist."
                                (append '("WORKON_HOME=/home/william/envs"
                                          "LC_ALL=C.UTF-8"
                                          "LANG=C.UTF-8")
-                                     process-environment)))
+                                       process-environment)))
                           (condition-case nil
                               (car (process-lines pipenv-command-path "--venv"))
                             (error nil)))))
@@ -181,12 +184,85 @@ Return the merged plist."
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection 'willsheu/lsp-get-pipenv-pyls-command)
                     :major-modes '(python-mode cython-mode)
-                    :priority 1
+                    :priority -2
                     :server-id 'pyls-pipenv
                     :library-folders-fn (lambda (_workspace) lsp-clients-python-library-directories)
                     :initialized-fn (lambda (workspace)
                                       (with-lsp-workspace workspace
                                         (lsp--set-configuration (lsp-configuration-section "pyls")))))))
+
+(defgroup willsheu nil
+  "My configs."
+  :group 'willsheu)
+
+(defcustom willsheu/pylsp-packages-environment "/home/william/workspace/pylsp-packages/"
+  "Path to folder containing Pipfile for pylsp packages."
+  :type 'string
+  :group 'willsheu)
+
+(defvar willsheu/python-venv-cache (make-hash-table :test 'equal))
+(defconst willsheu/cache-empty (make-symbol "willsheu/cache-empty"))
+(defmacro willsheu/cached (cache key value)
+  "Retrieve or compute & cache a VALUE in CACHE by KEY."
+  `(let* ((cache-evaluated ,cache)
+          (key-evaluated ,key)
+          (cached (gethash key-evaluated cache-evaluated willsheu/cache-empty)))
+     (if (eq cached willsheu/cache-empty)
+         (let ((value-evaluated ,value))
+           (puthash key-evaluated value-evaluated cache-evaluated)
+           value-evaluated)
+       cached)))
+
+(defun willsheu/resolve-python-venv (directory)
+  "Find the path to DIRECTORY's venv, if it exists."
+  (let ((default-directory (file-name-as-directory directory)))
+    (if-let* ((pipenv-command-path (executable-find "pipenv"))
+              (python-env (let ((process-environment
+                                 (append '("WORKON_HOME=/home/william/envs"
+                                           "LC_ALL=C.UTF-8"
+                                           "LANG=C.UTF-8")
+                                         process-environment)))
+                            (condition-case nil
+                                (car (process-lines pipenv-command-path "--venv"))
+                              (error nil)))))
+        (progn
+          (lsp--info "Found pipenv environment: %s" python-env)
+          python-env)
+      (progn
+        (lsp--warn "Couldn't find pipenv environment")
+        (if-let* ((venv-cmd lsp-pylsp-get-pyenv-environment)
+                  (venv (venv-cmd)))
+            venv
+          "/usr/")))))
+
+(defun willsheu/resolve-current-python-venv ()
+  "Call willsheu/resolve-python-venv with the cwd, cached."
+  (willsheu/cached willsheu/python-venv-cache
+                   default-directory
+                   (willsheu/resolve-python-venv default-directory)))
+
+
+(defun willsheu/lsp-pylsp-setup ()
+  "Do setup to customize lsp-pylsp."
+  (setq lsp-pylsp-server-command
+        (concat (file-name-as-directory
+                 (willsheu/cached willsheu/python-venv-cache
+                                  willsheu/pylsp-packages-environment
+                                  (willsheu/resolve-python-venv willsheu/pylsp-packages-environment)))
+                "bin/pylsp"))
+  (if (file-executable-p lsp-pylsp-server-command)
+      (lsp-register-custom-settings
+       '(("pylsp.plugins.jedi.environment" willsheu/resolve-current-python-venv)
+         ("pylsp.plugins.pylsp_mypy.overrides"
+          (lambda ()
+            (vector "--python-executable"
+                    (concat (file-name-as-directory
+                             (willsheu/resolve-current-python-venv))
+                            "bin/python")
+                    t)))
+         ("pylsp.plugins.pylsp_mypy.dmypy" t t)))
+    (message "Pylsp venv not set up correctly."))
+  )
 
 (defun willsheu/lsp-ts-ls-setup ()
   "Do setup to give more RAM to tsls."
@@ -217,6 +293,17 @@ BASE is the original init plist."
 (defun willsheu/lsp-rust-setup ()
   "Do setup to customize rust-analyzer."
   (advice-add 'lsp-rust-analyzer--make-init-options :filter-return 'willsheu/lsp-modify-rust-init))
+
+(defun ap/garbage-collect ()
+  "Run `garbage-collect' and print stats about memory usage."
+  (interactive)
+  (message (cl-loop for (type size used free) in (garbage-collect)
+                    for used = (* used size)
+                    for free = (* (or free 0) size)
+                    for total = (file-size-human-readable (+ used free))
+                    for used = (file-size-human-readable used)
+                    for free = (file-size-human-readable free)
+                    concat (format "%s: %s + %s = %s\n" type used free total))))
 
 (provide 'my-functions)
 ;;; my-functions.el ends here

@@ -4,49 +4,64 @@
 
 ;;; Code:
 ;; `package' initialization
-(require 'package)
-(add-to-list 'package-archives
-	     '("elpy" . "http://jorgenschaefer.github.io/packages/"))
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-;; (add-to-list 'package-archives
-;; 	     '("marmalade" . "http://marmalade-repo.org/packages/"))
 
-; (package-initialize)
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
 ; Bootstrap `use-package'
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+(straight-use-package 'use-package)
+
+;; Configure use-package to use straight.el by default
+(use-package straight
+             :custom (straight-use-package-by-default t))
 
 ;; Packages:
 ;; Custom Before:
 (use-package misc-config
+  :straight nil
   :load-path "lisp/")
 
 (use-package mac-config
+  :straight nil
   :if (eq system-type 'darwin)
   :load-path "lisp/")
 
 (use-package my-functions
+  :straight nil
   :load-path "lisp/")
 
 (use-package google-c-style
+  :straight nil
   :load-path "lisp/"
   :hook (c-mode-common . google-set-c-style))
 
 (use-package magit-workgroups
+  :straight nil
   :load-path "lisp/"
   :after (magit projectile workgroups2))
 
 ;; site-lisp:
 (use-package revbufs
+  :straight nil
   :load-path "site-lisp/")
 
 (use-package goto-last-change
+  :straight nil
   :load-path "site-lisp/"
   :bind ("C-x C-\\" . goto-last-change))
 
 (use-package prolog
+  :straight nil
   :load-path "site-lisp/"
   :mode "\\.pl\\'"
   :bind (:map prolog-mode-map
@@ -175,7 +190,11 @@
           (null (nthcdr 3 (window-list))))))
 
 (use-package workgroups2
-  :ensure t
+  :straight (workgroups2 :type git :host github :repo "pashinin/workgroups2"
+                         :files (:defaults "src/*.el")
+                         :fork (:host github
+                                      :repo "PenguinToast/workgroups2"))
+  :init
   :config
   (setq wg-prefix-key (kbd "C-z"))
   (setq wg-session-file "~/.emacs.d/.emacs_workgroups")
@@ -304,8 +323,10 @@
          (yaml-mode . highlight-indentation-current-column-mode)))
 
 (use-package dired
+  :straight nil
   :config
   (use-package dired-x
+    :straight nil
     :bind ("C-x C-j" . dired-jump)))
 
 (use-package ivy-xref
@@ -318,13 +339,17 @@
          (python-mode . lsp)
          (go-mode . lsp)
          (terraform-mode . lsp)
-         (rust-mode . lsp)
+         (rustic-mode . lsp)
+         (web-mode . lsp)
+         (dockerfile-mode . lsp)
          (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp
   :bind-keymap
   ("C-c l" . lsp-command-map)
+  :custom
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
   :config
-  (willsheu/lsp-pyls-setup)
+  (willsheu/lsp-pylsp-setup)
   (willsheu/lsp-ts-ls-setup)
   (willsheu/lsp-rust-setup)
   (setq lsp-keymap-prefix "C-c l")
@@ -375,6 +400,7 @@
   :mode ("\\.\\(vert\\|frag\\)\\'"))
 
 (use-package flycheck-glsl
+  :straight nil
   :load-path "site-lisp/")
 
 ;; Markdown
@@ -418,29 +444,25 @@
   :mode ("\\.\\(l\\|y\\)\\'"))
 
 ;; Rust
-(use-package rust-mode
+;; (use-package rust-mode
+;;   :ensure
+;;   :mode ("\\.rs\\'")
+;;   :config
+;;   (setq rust-format-on-save t))
+
+(use-package rustic
   :ensure
-  :mode ("\\.rs\\'")
+  :mode ("\\.rs\\'" . rustic-mode)
   :config
-  (setq rust-format-on-save t))
+  ;; uncomment for less flashiness
+  ;; (setq lsp-eldoc-hook nil)
+  ;; (setq lsp-enable-symbol-highlighting nil)
+  ;; (setq lsp-signature-auto-activate nil)
+
+  ;; comment to disable rustfmt on save
+  (setq rustic-format-on-save t))
 
 ;; Python
-;; (defun willsheu/pipenv-pyls-location ()
-;;   (message lsp--cur-workspace)
-;;   "pyls")
-
-(use-package elpy
-  :pin elpy
-  :disabled
-  :ensure t
-  :config
-  (setq elpy-rpc-python-command "python3")
-  (setq python-shell-interpreter "python3")
-  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-  (elpy-enable)
-  ;; TODO: FIXME
-  ;; (add-to-list 'flycheck-disabled-checkers 'python-flake8)
-  )
 
 (use-package pipenv
   :ensure t
@@ -738,7 +760,7 @@
 
 (use-package dockerfile-mode
   :ensure t
-  :mode "Dockerfile")
+  :mode "Dockerfile(\\..*)")
 
 (use-package terraform-mode
   :ensure t
@@ -752,9 +774,17 @@
   :init
   (company-terraform-init))
 
+(use-package kubernetes
+  :ensure t
+  :commands (kubernetes-overview)
+  :config
+  (setq kubernetes-poll-frequency 3600
+        kubernetes-redraw-frequency 3600))
+
 ;; Custom after
 
 (use-package my-flycheck-checkers
+  :straight nil
   :after (flycheck)
   :load-path "lisp/")
 
@@ -783,6 +813,7 @@
  '(lsp-pyls-server-command '("pyls_pipenv"))
  '(lsp-restart 'auto-restart)
  '(lsp-rust-analyzer-cargo-load-out-dirs-from-check t)
+ '(lsp-rust-analyzer-cargo-run-build-scripts t)
  '(lsp-rust-analyzer-proc-macro-enable t)
  '(lsp-rust-server 'rust-analyzer)
  '(lsp-ui-doc-enable nil)
@@ -795,7 +826,7 @@
  '(magit-refresh-verbose nil)
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(package-selected-packages
-   '(rust-mode git-link company-box which-key pipenv lsp-origami origami lsp-ivy minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
+   '(pcache workgroups2 quelpa-use-package quelpa git-link company-box which-key pipenv lsp-origami origami lsp-ivy minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
  '(prettier-js-show-errors 'echo)
  '(projectile-globally-ignored-directories
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
@@ -814,7 +845,8 @@
      (flycheck-gcc-include-path . "/home/william/workspace/BerkeleyCS/cs162/code/group/pintos/src")
      (projectile-project-name . "cs186-project")))
  '(sp-escape-quotes-after-insert nil)
- '(tags-revert-without-query t))
+ '(tags-revert-without-query t)
+ '(web-mode-enable-auto-indentation t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -825,3 +857,4 @@
  '(lsp-ui-sideline-global ((t (:background "#eee8d5"))))
  '(lsp-ui-sideline-symbol ((t (:foreground "grey60" :box (:line-width -1 :color "grey60") :height 0.99)))))
 (put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
