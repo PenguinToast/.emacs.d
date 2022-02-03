@@ -47,6 +47,7 @@
 
 (use-package magit-workgroups
   :straight nil
+  :disabled
   :load-path "lisp/"
   :after (magit projectile workgroups2))
 
@@ -88,7 +89,7 @@
 
 (use-package doom-modeline
   :ensure t
-  :after minions workgroups2
+  :after minions
   :hook (after-init . doom-modeline-mode)
   :config
   ;; Needed for doom-modeline
@@ -100,8 +101,7 @@
 
 ;; General:
 
-(use-package ibuffer
-  :bind ("C-x C-b" . ibuffer-other-window))
+(use-package ibuffer)
 
 (use-package exec-path-from-shell
   :ensure t
@@ -159,12 +159,13 @@
   :bind (("C-s" . swiper)
          ("C-r" . swiper-backward)
          ("C-c C-r" . ivy-resume))
+  :custom
+  (ivy-use-virtual-buffers t)
+  (enable-recursive-minibuffers t)
+  (projectile-completion-system 'ivy)
   :config
   (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t)
   (setq magit-completing-read-function 'ivy-completing-read)
-  (setq projectile-completion-system 'ivy)
   (use-package counsel
     :ensure t
     :bind (("M-x" . counsel-M-x)
@@ -189,11 +190,39 @@
         (lambda ()
           (null (nthcdr 3 (window-list))))))
 
+(use-package perspective
+  :ensure t
+  :demand
+  :bind (("C-x b" . persp-switch-to-buffer*)
+         ("C-x k" . persp-kill-buffer*)
+         ("C-x C-b" . persp-ibuffer)
+         :map perspective-map
+         ("C-s" . (lambda () (interactive) (persp-state-save persp-state-default-file)))
+         ("1" . (lambda () (interactive) (persp-switch-by-number 2)))
+         ("2" . (lambda () (interactive) (persp-switch-by-number 3)))
+         ("3" . (lambda () (interactive) (persp-switch-by-number 4)))
+         ("4" . (lambda () (interactive) (persp-switch-by-number 5)))
+         ("5" . (lambda () (interactive) (persp-switch-by-number 6)))
+         ("6" . (lambda () (interactive) (persp-switch-by-number 7)))
+         ("7" . (lambda () (interactive) (persp-switch-by-number 8)))
+         ("8" . (lambda () (interactive) (persp-switch-by-number 9)))
+         ("9" . (lambda () (interactive) (persp-switch-by-number 10)))
+         ("0" . (lambda () (interactive) (persp-switch-by-number 1))))
+  :custom
+  (persp-state-default-file "~/.emacs.d/.perspective_saved")
+  (persp-mode-prefix-key (kbd "C-z"))
+  (persp-modestring-short t)
+  :config
+  (persp-mode)
+  (add-hook 'kill-emacs-hook #'persp-state-save)
+  (persp-state-load persp-state-default-file))
+
 (use-package workgroups2
   :straight (workgroups2 :type git :host github :repo "pashinin/workgroups2"
                          :files (:defaults "src/*.el")
                          :fork (:host github
                                       :repo "PenguinToast/workgroups2"))
+  :disabled
   :init
   :config
   (setq wg-prefix-key (kbd "C-z"))
@@ -309,8 +338,8 @@
 
 (use-package ag
   :ensure t
-  :config
-  (setq ag-highlight-search t))
+  :custom
+  (ag-highlight-search t))
 
 (use-package winnow
   :ensure t
@@ -348,11 +377,11 @@
   ("C-c l" . lsp-command-map)
   :custom
   (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-keymap-prefix "C-c l")
   :config
   (willsheu/lsp-pylsp-setup)
   (willsheu/lsp-ts-ls-setup)
   (willsheu/lsp-rust-setup)
-  (setq lsp-keymap-prefix "C-c l")
   )
 
 (use-package lsp-ui
@@ -391,6 +420,39 @@
   :ensure t
   :config
   (which-key-mode))
+
+(use-package treemacs
+  :ensure t
+  :defer t
+  :config)
+
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
+
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
+
+(use-package lsp-treemacs
+  :after (treemacs lsp doom-themes)
+  :ensure t)
+
+(use-package treemacs-all-the-icons
+  :after (treemacs all-the-icons lsp-treemacs)
+  :ensure t
+  :config
+  (setq lsp-treemacs-theme "all-the-icons")
+  (treemacs-load-theme "all-the-icons"))
+
+(use-package treemacs-perspective
+  :after (treemacs perspective)
+  :ensure t
+  :config (treemacs-set-scope-type 'Perspectives))
 
 ;; Language:
 

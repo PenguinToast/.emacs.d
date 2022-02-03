@@ -183,6 +183,10 @@ bindsym $mod+Shift+s move container to workspace 12:emacs
 bindsym $mod+Shift+d move container to workspace 13:web
 bindsym $mod+Shift+z move container to workspace 14:slack
 
+# Prefer certain workspaces on certain displays
+workspace "12:emacs" output primary
+workspace "13:web" output primary
+
 # Don't auto-assign terminal
 # assign [class="Gnome-terminal"] term
 assign [class="Emacs"] 12:emacs
