@@ -24,3 +24,6 @@ srecode-map.el
 /var/
 /configs/.gitconfig
 /network-security.data
+/.cache/
+/eln-cache/
+/.log/
