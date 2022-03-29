@@ -90,10 +90,7 @@
 (use-package doom-modeline
   :ensure t
   :after minions
-  :hook (after-init . doom-modeline-mode)
-  :config
-  ;; Needed for doom-modeline
-  (add-to-list 'global-mode-string '(t (:eval (wg-mode-line-string)))))
+  :hook (after-init . doom-modeline-mode))
 
 (use-package solarized-theme
   :disabled
@@ -192,8 +189,9 @@
 
 (use-package perspective
   :ensure t
+  :after ivy
   :demand
-  :bind (("C-x b" . persp-switch-to-buffer*)
+  :bind (("C-x b" . persp-ivy-switch-buffer)
          ("C-x k" . persp-kill-buffer*)
          ("C-x C-b" . persp-ibuffer)
          :map perspective-map
@@ -212,6 +210,7 @@
   (persp-state-default-file "~/.emacs.d/.perspective_saved")
   (persp-mode-prefix-key (kbd "C-z"))
   (persp-modestring-short t)
+  (even-window-sizes nil)
   :config
   (persp-mode)
   (add-hook 'kill-emacs-hook #'persp-state-save)
@@ -362,15 +361,19 @@
   :ensure t
   :init (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
 
+(use-package el-patch
+  :ensure t)
+
 (use-package lsp-mode
   :ensure t
-  :hook ((typescript-mode . lsp)
-         (python-mode . lsp)
-         (go-mode . lsp)
-         (terraform-mode . lsp)
-         (rustic-mode . lsp)
-         (web-mode . lsp)
-         (dockerfile-mode . lsp)
+  :after el-patch
+  :hook ((typescript-mode . lsp-mode)
+         (python-mode . lsp-mode)
+         (go-mode . lsp-mode)
+         (terraform-mode . lsp-mode)
+         (rustic-mode . lsp-mode)
+         (web-mode . lsp-mode)
+         (dockerfile-mode . lsp-mode)
          (lsp-mode . lsp-enable-which-key-integration))
   :commands lsp
   :bind-keymap
@@ -378,10 +381,22 @@
   :custom
   (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-keymap-prefix "C-c l")
+  (lsp-clients-typescript-max-ts-server-memory 4096)
+  (lsp-log-max 10000)
+  (lsp-file-watch-threshold 5000)
+  :init
+  (el-patch-feature lsp-mode)
   :config
+  (add-hook 'hack-local-variables-hook (lambda () (when lsp-mode (lsp))))
+  (el-patch-deftype lsp-defun
+                    :classify el-patch-classify-function
+                    :locate el-patch-locate-function
+                    :font-lock el-patch-fontify-as-defun
+                    :declare ((doc-string 3)
+                              (indent defun)))
   (willsheu/lsp-pylsp-setup)
-  (willsheu/lsp-ts-ls-setup)
   (willsheu/lsp-rust-setup)
+  (willsheu/lsp-eslint-setup)
   )
 
 (use-package lsp-ui
@@ -847,6 +862,7 @@
 
 (use-package my-flycheck-checkers
   :straight nil
+  :disabled
   :after (flycheck)
   :load-path "lisp/")
 
@@ -894,7 +910,125 @@
    '(".idea" ".ensime_cache" ".eunit" ".git" ".hg" ".fslckout" "_FOSSIL_" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "*.ccls-cache" ".ccls-cache"))
  '(python-indent-offset 4)
  '(safe-local-variable-values
-   '((flycheck-disabled-checkers emacs-lisp-checkdoc)
+   '((eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-node-path
+                       (concat project-directory ".yarn/sdks")))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-package-manager "yarn")
+           (setq-local lsp-eslint-node-path
+                       (concat project-directory ".yarn/sdks"))
+           (setq-local lsp-eslint-working-directories
+                       (vector project-directory)))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-node-path
+                       (concat project-directory ".yarn/sdks"))
+           (setq-local lsp-eslint-working-directories
+                       (vector project-directory)))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-clients-typescript-server-args
+                       `("--tsserver-path" ,(concat project-directory ".yarn/sdks/typescript/bin/tsserver")
+                         "--stdio")))
+     (lsp-log-io . t)
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-node-path
+                       (concat project-directory ".yarn/sdks"))
+           (setq-local lsp-eslint-working-directories
+                       (vector project-directory
+                               (list :pattern
+                                     (concat project-directory "packages/*")))))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-eslint-package-manager "yarn")
+           (setq lsp-eslint-node-path
+                 (concat project-directory ".yarn/sdks"))
+           (setq lsp-eslint-working-directories
+                 (vector project-directory
+                         (list :pattern
+                               (concat project-directory "packages/*")))))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-eslint-package-manager "yarn")
+           (setq lsp-eslint-node-path
+                 (concat project-directory ".yarn/sdks"))
+           (setq lsp-eslint-working-directories
+                 (vector project-directory
+                         (concat project-directory "packages/*"))))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-eslint-package-manager "yarn")
+           (setq lsp-eslint-node-path
+                 (concat project-directory ".yarn/sdks")))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-eslint-package-manager "yarn")
+           (setq lsp-eslint-node-path
+                 (vector
+                  (concat project-directory ".yarn/sdks"))))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-clients-typescript-server-args
+                 `("--tsserver-path" ,(concat project-directory "../.yarn/sdks/typescript/bin/tsserver")
+                   "--stdio")))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-eslint-package-manager "yarn")
+           (setq lsp-eslint-node-path
+                 `(,(concat project-directory ".yarn/sdks"))))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-clients-typescript-server-args
+                 `("--tsserver-path" ,(concat project-directory ".yarn/sdks/typescript/bin/tsserver")
+                   "--stdio"))
+           (setq lsp-eslint-package-manager "yarn")
+           (setq lsp-eslint-node-path
+                 `(,(concat project-directory ".yarn/sdks"))))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-clients-typescript-server-args
+                 `("--tsserver-path" ,(concat project-directory ".yarn/sdks/typescript/bin/tsserver")
+                   "--stdio"))
+           (setq lsp-clients-typescript-server-args "yarn")
+           (setq lsp-eslint-node-path
+                 `(,(concat project-directory ".yarn/sdks"))))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq lsp-clients-typescript-server-args
+                 `("--tsserver-path" ,(concat project-directory ".yarn/sdks/typescript/bin/tsserver")
+                   "--stdio")))
+     (flycheck-disabled-checkers emacs-lisp-checkdoc)
      (eval font-lock-add-keywords nil
            `((,(concat "("
                        (regexp-opt

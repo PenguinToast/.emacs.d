@@ -192,7 +192,7 @@ workspace "13:web" output primary
 assign [class="Emacs"] 12:emacs
 assign [class="Google-chrome"] 13:web
 assign [class="Slack"] 14:slack
-assign [class="zoom"] 4
+assign [title="Zoom Meeting"] 4
 
 # Autostart applications
 exec --no-startup-id i3-msg 'workspace 11:term; exec i3-sensible-terminal'
@@ -241,5 +241,6 @@ bindsym $mod+Escape mode "$mode_system"
 bindsym --release Print exec shutter -s
 bindsym --release Shift+Print exec shutter -w
 
+exec --no-startup-id xcompmgr -c -l0 -t0 -r0 -o.00
 exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png
 exec --no-startup-id xset s off

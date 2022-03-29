@@ -260,29 +260,10 @@ Return the merged plist."
                              (willsheu/resolve-current-python-venv))
                             "bin/python")
                     t)))
-         ("pylsp.plugins.pylsp_mypy.dmypy" t t)))
+         ;;("pylsp.plugins.pylsp_mypy.dmypy" t t)
+         ))
     (message "Pylsp venv not set up correctly."))
   )
-
-(defun willsheu/lsp-ts-ls-setup ()
-  "Do setup to give more RAM to tsls."
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-stdio-connection (lambda ()
-                                                            `(,(lsp-package-path 'typescript-language-server)
-                                                              "--tsserver-path"
-                                                              ,(lsp-package-path 'typescript)
-                                                              ,@lsp-clients-typescript-server-args)))
-                    :activation-fn 'lsp-typescript-javascript-tsx-jsx-activate-p
-                    :priority 0
-                    :environment-fn (lambda ()
-                                      '(("NODE_OPTIONS" . "--max_old_space_size=4096")))
-                    :completion-in-comments? t
-                    :initialization-options (lambda ()
-                                              (list :plugins lsp-clients-typescript-plugins
-                                                    :logVerbosity lsp-clients-typescript-log-verbosity
-                                                    :tsServerPath (lsp-package-path 'typescript)))
-                    :ignore-messages '("readFile .*? requested by TypeScript but content not available")
-                    :server-id 'ts-ls-2)))
 
 (defun willsheu/lsp-modify-rust-init (base)
   "Modify init plist.
@@ -294,6 +275,38 @@ BASE is the original init plist."
   "Do setup to customize rust-analyzer."
   (advice-add 'lsp-rust-analyzer--make-init-options :filter-return 'willsheu/lsp-modify-rust-init))
 
+(defun willsheu/lsp-eslint-setup ()
+  "Do setup to customize eslint."
+  (el-patch-lsp-defun lsp-eslint--configuration (_workspace (&ConfigurationParams :items))
+                      (->> items
+                           (seq-map (-lambda ((&ConfigurationItem :scope-uri?))
+                                      (-when-let* ((file (lsp--uri-to-path scope-uri?))
+                                                   (buffer (find-buffer-visiting file))
+                                                   (workspace-folder (lsp-find-session-folder (lsp-session) file)))
+                                        (with-current-buffer buffer
+                                          (list :validate (if (member (lsp-buffer-language) lsp-eslint-validate) "on" "probe")
+                                                :packageManager lsp-eslint-package-manager
+                                                :codeAction (list
+                                                             :disableRuleComment (list
+                                                                                  :enable (lsp-json-bool lsp-eslint-code-action-disable-rule-comment)
+                                                                                  :location lsp-eslint-code-action-disable-rule-comment-location)
+                                                             :showDocumentation (list
+                                                                                 :enable (lsp-json-bool lsp-eslint-code-action-show-documentation)))
+                                                :codeActionOnSave (list :enable (lsp-json-bool lsp-eslint-auto-fix-on-save)
+                                                                        :mode lsp-eslint-fix-all-problem-type)
+                                                :format (lsp-json-bool lsp-eslint-format)
+                                                :quiet (lsp-json-bool lsp-eslint-quiet)
+                                                :onIgnoredFiles (if lsp-eslint-warn-on-ignored-files "warn" "off")
+                                                :options (or lsp-eslint-options (ht))
+                                                :rulesCustomizations lsp-eslint-rules-customizations
+                                                :run lsp-eslint-run
+                                                :nodePath lsp-eslint-node-path
+                                                :workspaceFolder (list :uri (lsp--path-to-uri workspace-folder)
+                                                                       :name (f-filename workspace-folder))
+                                                (el-patch-add :workingDirectories (vector lsp-eslint-working-directories)))))))
+                           (apply #'vector)))
+  )
+
 (defun ap/garbage-collect ()
   "Run `garbage-collect' and print stats about memory usage."
   (interactive)
@@ -304,6 +317,7 @@ BASE is the original init plist."
                     for used = (file-size-human-readable used)
                     for free = (file-size-human-readable free)
                     concat (format "%s: %s + %s = %s\n" type used free total))))
+
 
 (provide 'my-functions)
 ;;; my-functions.el ends here

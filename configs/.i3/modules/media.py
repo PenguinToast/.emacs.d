@@ -48,6 +48,7 @@ from time import sleep
 from gi.repository import Playerctl, GLib
 import thread
 
+
 class Py3status:
     """
     The Py3status class name is mandatory.
@@ -57,34 +58,35 @@ class Py3status:
     This examples features only one parameter which is 'cache_timeout'
     and is set to 10 seconds (0 would mean no cache).
     """
+
     # available configuration parameters
     cache_timeout = 5
-    format = u'{artist} : {title}'
-    color_pause = '#999900'
-    color_play = '#BBFF00'
+    format = u"{artist} : {title}"
+    color_pause = "#999900"
+    color_play = "#BBFF00"
 
     # internal variables
     _song_playing = False
-    _title = 'Title'
-    _artist = 'Artist'
-    _album = 'Album'
-    _rtime = '0'
+    _title = "Title"
+    _artist = "Artist"
+    _album = "Album"
+    _rtime = "0"
     _color = None
 
     def _setup_player(self):
         player = Playerctl.Player()
         self._player = player
-        player_name = player.get_property('player-name')
+        player_name = player.get_property("player-name")
         if player_name == None:
             self._song_playing = False
             self.cache_timeout = 5
         else:
             self.cache_timeout = 1
-            player.on('metadata', self._on_metadata)
-            player.on('stop', self._on_stop)
-            player.on('play', self._on_play)
-            player.on('pause', self._on_pause)
-            self._update_metadata(player.get_property('metadata'))
+            player.on("metadata", self._on_metadata)
+            player.on("stop", self._on_stop)
+            player.on("play", self._on_play)
+            player.on("pause", self._on_pause)
+            self._update_metadata(player.get_property("metadata"))
             self._update_status()
         pass
 
@@ -105,38 +107,40 @@ class Py3status:
         pass
 
     def _update_status(self):
-        status = self._player.get_property('status')
-        if status == 'Playing':
+        status = self._player.get_property("status")
+        if status == "Playing":
             self._song_playing = True
             self._color = self.color_play
-        elif status == 'Paused':
+        elif status == "Paused":
             self._song_playing = True
             self._color = self.color_pause
-        elif status == 'Stopped':
+        elif status == "Stopped":
             self._song_playing = False
         pass
 
     def _update_metadata(self, data):
         if not data:
-            self._title = 'None'
-            self._artist = 'None'
-            self._album = 'None'
-            self._rtime = '0'
+            self._title = "None"
+            self._artist = "None"
+            self._album = "None"
+            self._rtime = "0"
         else:
-            self._title = data['xesam:title']
-            self._artist = '/'.join(data['xesam:artist'])
-            self._album = data['xesam:album']
-            self._rtime = str(timedelta(microseconds=data['mpris:length']))
+            self._title = data["xesam:title"]
+            self._artist = "/".join(data["xesam:artist"])
+            self._album = data["xesam:album"]
+            self._rtime = str(timedelta(microseconds=data["mpris:length"]))
         pass
 
     def _update_text(self):
         if self._song_playing == False:
-            self.full_text = 'Nothing'
+            self.full_text = "Nothing"
         else:
-            self.full_text = self.format.format(title=self._title,
-                                                artist=self._artist,
-                                                album=self._album,
-                                                time=self._rtime)
+            self.full_text = self.format.format(
+                title=self._title,
+                artist=self._artist,
+                album=self._album,
+                time=self._rtime,
+            )
         pass
 
     def __init__(self):
@@ -169,12 +173,13 @@ class Py3status:
                 self._update_text()
 
         response = {
-            'cached_until': time() + self.cache_timeout,
-            'full_text': self.full_text,
-            'color' : self._color,
-            'name': 'media'
+            "cached_until": time() + self.cache_timeout,
+            "full_text": self.full_text,
+            "color": self._color,
+            "name": "media",
         }
         return response
+
 
 if __name__ == "__main__":
     """
@@ -182,9 +187,7 @@ if __name__ == "__main__":
     This SHOULD work before contributing your module please.
     """
     x = Py3status()
-    config = {
-        'format' : '{title} - {album} ({artist}) {time}'
-    }
+    config = {"format": "{title} - {album} ({artist}) {time}"}
     while True:
         print(x.media([], config))
         sleep(1)
