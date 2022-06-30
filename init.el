@@ -381,7 +381,7 @@
   :custom
   (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-keymap-prefix "C-c l")
-  (lsp-clients-typescript-max-ts-server-memory 4096)
+  (lsp-clients-typescript-max-ts-server-memory 8192)
   (lsp-log-max 10000)
   (lsp-file-watch-threshold 5000)
   :init
@@ -637,6 +637,9 @@
 (use-package typescript-mode
   :ensure t
   :mode ("\\.ts\\'")
+  :bind (:map typescript-mode-map
+              ("M-q" . c-fill-paragraph)
+              ("M-j" . c-indent-new-comment-line))
   :config
   (setq-default typescript-indent-level 2))
 
@@ -894,7 +897,6 @@
  '(lsp-rust-analyzer-cargo-run-build-scripts t)
  '(lsp-rust-analyzer-proc-macro-enable t)
  '(lsp-rust-server 'rust-analyzer)
- '(lsp-ui-doc-enable nil)
  '(lsp-ui-peek-enable nil)
  '(lsp-ui-sideline-enable t)
  '(lsp-ui-sideline-show-code-actions nil)
@@ -902,6 +904,7 @@
  '(lsp-use-native-json t)
  '(magit-diff-use-overlays nil)
  '(magit-refresh-verbose nil)
+ '(magit-section-initial-visibility-alist '((stashes . hide) (untracked . hide)))
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(package-selected-packages
    '(pcache workgroups2 quelpa-use-package quelpa git-link company-box which-key pipenv lsp-origami origami lsp-ivy minions company-terraform terraform-mode winnow forge cmake-mode glsl-mode flymd ccls prettier-js tide ediprolog dockerfile-mode counsel-projectile ivy-hydra counsel jdee org company-go go-mode flycheck-elm material-theme hemisu-theme leuven-theme color-theme-sanityinc-tomorrow dired-details+ web-mode solarized-theme robe lua-mode list-processes+ js2-mode idle-highlight-mode icicles hydra highlight-indent-guides haml-mode geiser fuzzy-match flycheck facemenu+ exec-path-from-shell elpy column-marker auctex ag))
@@ -1054,3 +1057,4 @@
  '(lsp-ui-sideline-symbol ((t (:foreground "grey60" :box (:line-width -1 :color "grey60") :height 0.99)))))
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
