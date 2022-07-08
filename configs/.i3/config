@@ -153,6 +153,7 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
+    font pango:monospace 12
     status_command py3status -c ~/.i3/i3status.conf -i ~/.i3/modules/
     strip_workspace_numbers yes
     mode hide
@@ -206,12 +207,12 @@ bindsym $mod+Shift+Tab workspace prev_on_output
 # grrr... there's no output next
 bindsym $alt+Tab focus output right
 # Pulse Audio controls
-bindsym XF86AudioRaiseVolume exec pactl set-sink-volume 0 +5% && killall -USR1 py3status #increase sound volume
-bindsym XF86AudioLowerVolume exec pactl set-sink-volume 0 -5% && killall -USR1 py3status #decrease sound volume
-bindsym XF86AudioMute exec pactl set-sink-mute 0 toggle && killall -USR1 py3status # mute sound
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume $(pactl get-default-sink) +5% && killall -USR1 py3status #increase sound volume
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume $(pactl get-default-sink) -5% && killall -USR1 py3status #decrease sound volume
+bindsym XF86AudioMute exec pactl set-sink-mute $(pactl get-default-sink) toggle && killall -USR1 py3status # mute sound
 # Incremental
-bindsym Shift+XF86AudioRaiseVolume exec pactl set-sink-volume 0 +1% && killall -USR1 py3status
-bindsym Shift+XF86AudioLowerVolume exec pactl set-sink-volume 0 -1% && killall -USR1 py3status
+bindsym Shift+XF86AudioRaiseVolume exec pactl set-sink-volume $(pactl get-default-sink) +1% && killall -USR1 py3status
+bindsym Shift+XF86AudioLowerVolume exec pactl set-sink-volume $(pactl get-default-sink) -1% && killall -USR1 py3status
 
 # Sreen brightness controls
 # bindsym XF86MonBrightnessUp exec xbacklight -inc 10 # increase screen brightness
@@ -244,3 +245,6 @@ bindsym --release Shift+Print exec shutter -w
 exec --no-startup-id xcompmgr -c -l0 -t0 -r0 -o.00
 exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png
 exec --no-startup-id xset s off
+
+include ~/.config/i3/config.d/`hostname`.conf
+
