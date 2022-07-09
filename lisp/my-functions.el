@@ -152,16 +152,34 @@ Return the merged plist."
                       (setq first (plist-put first key merged-value))))))))
   first)
 
+
+(defun willsheu/process-lines-stdout (program &rest args)
+  "Execute PROGRAM with ARGS, returning its output (dropping stdout) as a list
+of lines.  Signal an error if the program returns with a non-zero exit status.
+Also see `process-lines-ignore-status'."
+  (with-temp-buffer
+    (let ((status (apply 'call-process program nil `(,(current-buffer) nil) nil args)))
+	    (unless (eq status 0)
+	      (error "%s exited with status %s" program status))
+      (goto-char (point-min))
+      (let (lines)
+	      (while (not (eobp))
+	        (setq lines (cons (buffer-substring-no-properties
+			                       (line-beginning-position)
+			                       (line-end-position))
+			                      lines))
+	        (forward-line 1))
+	      (nreverse lines)))))
+
 (defun willsheu/lsp-get-pipenv-environment (orig-fun &rest args)
   "Return the venv folder using pipenv."
   (if-let* ((pipenv-command-path (executable-find "pipenv"))
             (python-env (let ((process-environment
-                               (append '("WORKON_HOME=/home/william/envs"
-                                         "LC_ALL=C.UTF-8"
+                               (append '("LC_ALL=C.UTF-8"
                                          "LANG=C.UTF-8")
                                        process-environment)))
                           (condition-case nil
-                              (car (process-lines pipenv-command-path "--venv"))
+                              (car (willsheu/process-lines-stdout pipenv-command-path "--venv"))
                             (error nil)))))
       (progn
         (lsp--info "Found pipenv environment: %s" python-env)
@@ -172,7 +190,7 @@ Return the merged plist."
 
 (defun willsheu/lsp-get-pipenv-pyls-command ()
   "Return the pyls in pipenv, or default."
-  (if-let* ((python-env (lsp-pyls-get-pyenv-environment))
+  (if-let* ((python-env (lsp-pylsp-get-pyenv-environment))
             (pyls-command (concat (file-name-as-directory python-env) "bin/pyls"))
             (pyls-executable (file-executable-p pyls-command)))
       pyls-command
@@ -180,7 +198,7 @@ Return the merged plist."
 
 (defun willsheu/lsp-pyls-setup ()
   "Do setup to customize lsp-pyls."
-  (advice-add 'lsp-pyls-get-pyenv-environment :around 'willsheu/lsp-get-pipenv-environment)
+  (advice-add 'lsp-pylsp-get-pyenv-environment :around 'willsheu/lsp-get-pipenv-environment)
   (lsp-register-client
    (make-lsp-client :new-connection (lsp-stdio-connection 'willsheu/lsp-get-pipenv-pyls-command)
                     :major-modes '(python-mode cython-mode)
@@ -218,20 +236,20 @@ Return the merged plist."
   (let ((default-directory (file-name-as-directory directory)))
     (if-let* ((pipenv-command-path (executable-find "pipenv"))
               (python-env (let ((process-environment
-                                 (append '("WORKON_HOME=/home/william/envs"
-                                           "LC_ALL=C.UTF-8"
+                                 (append '("LC_ALL=C.UTF-8"
                                            "LANG=C.UTF-8")
                                          process-environment)))
                             (condition-case nil
-                                (car (process-lines pipenv-command-path "--venv"))
+                                (car (willsheu/process-lines-stdout pipenv-command-path "--venv"))
                               (error nil)))))
         (progn
           (lsp--info "Found pipenv environment: %s" python-env)
           python-env)
       (progn
         (lsp--warn "Couldn't find pipenv environment")
-        (if-let* ((venv-cmd lsp-pylsp-get-pyenv-environment)
-                  (venv (venv-cmd)))
+        (if-let* ((venv (lsp-pylsp-get-pyenv-environment)))
+        ;; (if-let* ((venv-cmd lsp-pylsp-get-pyenv-environment)
+        ;;           (venv (venv-cmd)))
             venv
           "/usr/")))))
 

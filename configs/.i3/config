@@ -170,6 +170,7 @@ exec_always xset r rate 300 35 # Set initial delay 300ms, repeat 35ms
 
 exec --no-startup-id nm-applet
 exec --no-startup-id udiskie --tray
+exec --no-startup-id /usr/libexec/geoclue-2.0/demos/agent
 exec --no-startup-id redshift
 exec --no-startup-id light-locker
 exec --no-startup-id dropbox start

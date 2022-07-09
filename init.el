@@ -386,7 +386,9 @@
   (lsp-file-watch-threshold 5000)
   :init
   (el-patch-feature lsp-mode)
+  (setq read-process-output-max (* 1024 1024)) ;; 1mb
   :config
+  (setq lsp-disabled-clients '(pyls))
   (add-hook 'hack-local-variables-hook (lambda () (when lsp-mode (lsp))))
   (el-patch-deftype lsp-defun
                     :classify el-patch-classify-function
@@ -394,9 +396,9 @@
                     :font-lock el-patch-fontify-as-defun
                     :declare ((doc-string 3)
                               (indent defun)))
-  (willsheu/lsp-pylsp-setup)
   (willsheu/lsp-rust-setup)
   (willsheu/lsp-eslint-setup)
+  (willsheu/lsp-pylsp-setup)
   )
 
 (use-package lsp-ui
@@ -887,6 +889,7 @@
  '(flycheck-gometalinter-fast t)
  '(flycheck-gometalinter-tests t)
  '(flycheck-gometalinter-vendor t)
+ '(gc-cons-threshold 100000000)
  '(hl-sexp-background-color "#efebe9")
  '(inhibit-startup-screen t)
  '(js-indent-level 2)
