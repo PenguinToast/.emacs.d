@@ -155,6 +155,13 @@ class VpnSwitcher:
                 print(f'Connection {name} currently active, deactivating')
                 connection.down()
 
+        # Special case "none"
+        if connection_name == 'none':
+            print('All connections deactivated')
+            notification = notify2.Notification(f'{connection_name} VPN', 'All connections deactivated')
+            notification.show()
+            return
+
         connection = self.connections[connection_name]
         if connection.status() == ConnectionStatus.Up:
             print(f'Connection {connection_name} already up, skipping')

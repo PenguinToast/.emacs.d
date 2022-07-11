@@ -22,8 +22,8 @@ case "$1" in
   systemctl stop openvpn-client@"$2"
   ;;
 'status')
-  status=$(systemctl -p ActiveState --value show openvpn-client@"$2")
-  if [ "$status" == "active" ]; then
+  status=$(systemctl show -P StatusText openvpn-client@"$2")
+  if [ "$status" == "Initialization Sequence Completed" ]; then
     echo "up"
   else
     echo "down"
