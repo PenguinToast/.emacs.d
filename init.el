@@ -387,6 +387,7 @@
   :init
   (el-patch-feature lsp-mode)
   (setq read-process-output-max (* 1024 1024)) ;; 1mb
+  (setq lsp-use-plists t)
   :config
   (setq lsp-disabled-clients '(pyls))
   (add-hook 'hack-local-variables-hook (lambda () (when lsp-mode (lsp))))
@@ -396,10 +397,17 @@
                     :font-lock el-patch-fontify-as-defun
                     :declare ((doc-string 3)
                               (indent defun)))
+  (advice-add 'lsp :before (lambda (&rest _args) (eval '(setf (lsp-session-server-id->folders (lsp-session)) (ht)))))
   (willsheu/lsp-rust-setup)
-  (willsheu/lsp-eslint-setup)
+  ;; (willsheu/lsp-eslint-setup)
   (willsheu/lsp-pylsp-setup)
   )
+
+(use-package lsp-eslint
+  :straight nil
+  :after lsp-mode
+  :config
+  (willsheu/lsp-eslint-setup))
 
 (use-package lsp-ui
   :ensure t
@@ -863,6 +871,10 @@
   (setq kubernetes-poll-frequency 3600
         kubernetes-redraw-frequency 3600))
 
+(use-package kubel
+  :after (vterm)
+  :config (kubel-vterm-setup))
+
 ;; Custom after
 
 (use-package my-flycheck-checkers
@@ -883,6 +895,8 @@
  '(custom-safe-themes
    '("d91ef4e714f05fff2070da7ca452980999f5361209e679ee988e3c432df24347" "c1390663960169cd92f58aad44ba3253227d8f715c026438303c09b9fb66cdfb" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "7feeed063855b06836e0262f77f5c6d3f415159a98a9676d549bfeb6c49637c4" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "82d2cac368ccdec2fcc7573f24c3f79654b78bf133096f9b40c20d97ec1d8016" "e56ee322c8907feab796a1fb808ceadaab5caba5494a50ee83a13091d5b1a10c" "77bd459212c0176bdf63c1904c4ba20fce015f730f0343776a1a14432de80990" "b0ab5c9172ea02fba36b974bbd93bc26e9d26f379c9a29b84903c666a5fde837" "c1fb68aa00235766461c7e31ecfc759aa2dd905899ae6d95097061faeb72f9ee" "c36614262f32c16cd71e0561a26e5c02486b6a476a6adec7a5cc5582128e665e" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default))
  '(dired-details-initially-hide nil)
+ '(doom-modeline-buffer-encoding 'nondefault)
+ '(doom-modeline-buffer-file-name-style 'relative-from-project)
  '(elpy-rpc-python-command "/home/william/envs/elpy-rpc-venv/bin/python3")
  '(fci-rule-character-color "#d9d9d9")
  '(flycheck-disabled-checkers '(python-pycompile python-mypy))
@@ -893,6 +907,7 @@
  '(hl-sexp-background-color "#efebe9")
  '(inhibit-startup-screen t)
  '(js-indent-level 2)
+ '(lsp-headerline-breadcrumb-enable nil)
  '(lsp-prefer-flymake nil)
  '(lsp-pyls-server-command '("pyls_pipenv"))
  '(lsp-restart 'auto-restart)
@@ -900,8 +915,10 @@
  '(lsp-rust-analyzer-cargo-run-build-scripts t)
  '(lsp-rust-analyzer-proc-macro-enable t)
  '(lsp-rust-server 'rust-analyzer)
+ '(lsp-ui-doc-enable nil)
+ '(lsp-ui-imenu-enable nil)
  '(lsp-ui-peek-enable nil)
- '(lsp-ui-sideline-enable t)
+ '(lsp-ui-sideline-enable nil)
  '(lsp-ui-sideline-show-code-actions nil)
  '(lsp-ui-sideline-show-diagnostics t)
  '(lsp-use-native-json t)
@@ -918,6 +935,37 @@
  '(python-indent-offset 4)
  '(safe-local-variable-values
    '((eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-node-path
+                       (concat project-directory "server/node_modules"))
+           (setq-local lsp-eslint-working-directories
+                       (vector ".")))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-working-directories
+                       (vector ".")))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-node-path
+                       (concat project-directory ".yarn/sdks"))
+           (setq-local lsp-eslint-working-directories
+                       (vector ".")))
+     (eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-node-path
+                       (concat project-directory ".yarn/sdks"))
+           (setq-local lsp-clients-typescript-server-args
+                       `("--tsserver-path" ,(concat project-directory ".yarn/sdks/typescript/bin/tsserver")
+                         "--stdio")))
+     (eval let
            ((project-directory
              (car
               (dir-locals-find-file default-directory))))

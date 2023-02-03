@@ -295,34 +295,36 @@ BASE is the original init plist."
 
 (defun willsheu/lsp-eslint-setup ()
   "Do setup to customize eslint."
-  (el-patch-lsp-defun lsp-eslint--configuration (_workspace (&ConfigurationParams :items))
-                      (->> items
-                           (seq-map (-lambda ((&ConfigurationItem :scope-uri?))
-                                      (-when-let* ((file (lsp--uri-to-path scope-uri?))
-                                                   (buffer (find-buffer-visiting file))
-                                                   (workspace-folder (lsp-find-session-folder (lsp-session) file)))
-                                        (with-current-buffer buffer
-                                          (list :validate (if (member (lsp-buffer-language) lsp-eslint-validate) "on" "probe")
-                                                :packageManager lsp-eslint-package-manager
-                                                :codeAction (list
-                                                             :disableRuleComment (list
-                                                                                  :enable (lsp-json-bool lsp-eslint-code-action-disable-rule-comment)
-                                                                                  :location lsp-eslint-code-action-disable-rule-comment-location)
-                                                             :showDocumentation (list
-                                                                                 :enable (lsp-json-bool lsp-eslint-code-action-show-documentation)))
-                                                :codeActionOnSave (list :enable (lsp-json-bool lsp-eslint-auto-fix-on-save)
-                                                                        :mode lsp-eslint-fix-all-problem-type)
-                                                :format (lsp-json-bool lsp-eslint-format)
-                                                :quiet (lsp-json-bool lsp-eslint-quiet)
-                                                :onIgnoredFiles (if lsp-eslint-warn-on-ignored-files "warn" "off")
-                                                :options (or lsp-eslint-options (ht))
-                                                :rulesCustomizations lsp-eslint-rules-customizations
-                                                :run lsp-eslint-run
-                                                :nodePath lsp-eslint-node-path
-                                                :workspaceFolder (list :uri (lsp--path-to-uri workspace-folder)
-                                                                       :name (f-filename workspace-folder))
-                                                (el-patch-add :workingDirectories (vector lsp-eslint-working-directories)))))))
-                           (apply #'vector)))
+  ;; (macroexpand '(setf (lsp--client-multi-root (gethash 'eslint lsp-clients)) nil))
+  (progn (or (progn (and (memq (type-of (gethash 'eslint lsp-clients)) cl-struct-lsp--client-tags) t)) (signal 'wrong-type-argument (list 'lsp--client (gethash 'eslint lsp-clients)))) (let* ((v (gethash 'eslint lsp-clients))) (aset v 16 nil)))
+  ;; (el-patch-lsp-defun lsp-eslint--configuration (_workspace (&ConfigurationParams :items))
+  ;;                     (->> items
+  ;;                          (seq-map (-lambda ((&ConfigurationItem :scope-uri?))
+  ;;                                     (-when-let* ((file (lsp--uri-to-path scope-uri?))
+  ;;                                                  (buffer (find-buffer-visiting file))
+  ;;                                                  (workspace-folder (lsp-find-session-folder (lsp-session) file)))
+  ;;                                       (with-current-buffer buffer
+  ;;                                         (list :validate (if (member (lsp-buffer-language) lsp-eslint-validate) "on" "probe")
+  ;;                                               :packageManager lsp-eslint-package-manager
+  ;;                                               :codeAction (list
+  ;;                                                            :disableRuleComment (list
+  ;;                                                                                 :enable (lsp-json-bool lsp-eslint-code-action-disable-rule-comment)
+  ;;                                                                                 :location lsp-eslint-code-action-disable-rule-comment-location)
+  ;;                                                            :showDocumentation (list
+  ;;                                                                                :enable (lsp-json-bool lsp-eslint-code-action-show-documentation)))
+  ;;                                               :codeActionOnSave (list :enable (lsp-json-bool lsp-eslint-auto-fix-on-save)
+  ;;                                                                       :mode lsp-eslint-fix-all-problem-type)
+  ;;                                               :format (lsp-json-bool lsp-eslint-format)
+  ;;                                               :quiet (lsp-json-bool lsp-eslint-quiet)
+  ;;                                               :onIgnoredFiles (if lsp-eslint-warn-on-ignored-files "warn" "off")
+  ;;                                               :options (or lsp-eslint-options (ht))
+  ;;                                               :rulesCustomizations lsp-eslint-rules-customizations
+  ;;                                               :run lsp-eslint-run
+  ;;                                               :nodePath lsp-eslint-node-path
+  ;;                                               :workspaceFolder (list :uri (lsp--path-to-uri workspace-folder)
+  ;;                                                                      :name (f-filename workspace-folder))
+  ;;                                               (el-patch-add :workingDirectories (vector lsp-eslint-working-directories)))))))
+  ;;                          (apply #'vector)))
   )
 
 (defun ap/garbage-collect ()

@@ -64,7 +64,7 @@ while true; do
   esac
 done
 
-if [ "$#" != "2" ]; then
+if (( "$#" < 2 )); then
   echo "2 positional arguments required" 1>&2
 	echo "$USAGE"
 	exit 1
@@ -73,19 +73,28 @@ fi
 state_dir=$(dirname "$0")/../state
 pid_file="${state_dir}/globalprotect_$2.pid"
 
-case "$1" in
+action="$1"
+shift
+
+case "${action}" in
   'up')
-    if [[ -z ${user+x} || -z ${password+x} || -z ${tokens+x} ]]; then
+    if [[ -z ${user+x} || -z ${password+x} ]]; then
       echo "Missing required parameters" 1>&2
       echo "$USAGE"
       exit 1
     fi
-    IFS=',' read -ra tokens <<< "$tokens"
-    pwd_str=""
-    for t in "${tokens[@]}"; do
-      pwd_str="${pwd_str}${password}${t}\n"
-    done
-    printf "$pwd_str" | openconnect --protocol=gp -b --non-inter --passwd-on-stdin --pid-file="$pid_file" -u "$user" "$2" 1>&2
+    if [[ -z ${tokens+x} ]]; then
+      pwd_str="${password}"
+    else
+      IFS=',' read -ra tokens <<< "$tokens"
+      pwd_str=""
+      for t in "${tokens[@]}"; do
+        pwd_str="${pwd_str}${password}${t}\n"
+      done
+    fi
+    endpoint="$1"
+    shift
+    printf "$pwd_str" | openconnect --protocol=gp -b --non-inter --passwd-on-stdin --pid-file="$pid_file" -u "$user" "$@" "$endpoint" 1>&2
     ;;
   'down')
     kill -INT $(cat "$pid_file")

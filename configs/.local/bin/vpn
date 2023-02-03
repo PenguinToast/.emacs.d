@@ -12,53 +12,71 @@ import subprocess
 import notify2
 import time
 
-BASE_DIR = os.path.join(str(Path.home()), '.vpn/')
-CLIENTS_DIR = os.path.join(BASE_DIR, 'clients/')
-CONNECTIONS_DIR = os.path.join(BASE_DIR, 'connections/')
+BASE_DIR = os.path.join(str(Path.home()), ".vpn/")
+CLIENTS_DIR = os.path.join(BASE_DIR, "clients/")
+CONNECTIONS_DIR = os.path.join(BASE_DIR, "connections/")
 SWITCH_TIMEOUT = 10
 
 
 def get_yubikey_token() -> str:
     window = tk.Tk()
-    window.title('Touch Yubikey')
-    window.attributes('-type', 'dialog')
+    window.title("Touch Yubikey")
+    window.attributes("-type", "dialog")
     entry = tk.Entry()
     entry.pack()
 
     result: Optional[str] = None
 
     def handle_key(event):
-        if event.char in ['\t', '\r', '\n']:
+        if event.char in ["\t", "\r", "\n"]:
             nonlocal result
             result = entry.get()
             window.destroy()
+
     entry.bind("<Key>", handle_key)
     entry.focus_set()
     window.mainloop()
     if result is None:
-        raise Exception('No yubikey token entered')
+        raise Exception("No yubikey token entered")
     return result
 
 
 def get_auth_args(config: ConfigParser) -> Mapping[str, str]:
     args = dict()
-    auth_conf = config['auth']
-    if 'user' in auth_conf:
-        args['--user'] = auth_conf['user']
-    if 'password' in auth_conf:
-        args['--password'] = auth_conf['password']
-    if 'tokens' in auth_conf:
-        num_tokens = config.getint('auth', 'tokens')
+    if "auth" not in config:
+        return args
+
+    auth_conf = config["auth"]
+    if "tokens" in auth_conf:
+        num_tokens = config.getint("auth", "tokens")
         tokens = []
         for _ in range(num_tokens):
             tokens.append(get_yubikey_token())
-        args['--tokens'] = ','.join(tokens)
+        args["--tokens"] = ",".join(tokens)
+    if "user" in auth_conf:
+        args["--user"] = auth_conf["user"]
+    if "password" in auth_conf:
+        args["--password"] = auth_conf["password"]
+    return args
+
+
+def get_extra_args(config: ConfigParser) -> Mapping[str, str]:
+    args = dict()
+    if "extra" not in config:
+        return args
+
+    conf = config["extra"]
+    for key, value in conf.items():
+        if key in ["tokens"]:
+            continue
+        args[f"--{key}"] = value
+
     return args
 
 
 class ConnectionStatus(Enum):
-    Up = 'up'
-    Down = 'down'
+    Up = "up"
+    Down = "down"
 
 
 class Client:
@@ -66,54 +84,63 @@ class Client:
         self.name = name
         self.path = path
 
-    def execute(self, *args, **kwargs) -> str:
+    def execute(
+        self,
+        *args,
+        pre_positional: Mapping[str, str] = dict(),
+        post_positional: Mapping[str, str] = dict(),
+    ) -> str:
         options = []
-        for key, value in kwargs.items():
+        for key, value in pre_positional.items():
             options.extend([key, value])
-        process = subprocess.Popen([self.path, *options, *args],
-                                   stdout=subprocess.PIPE)
+        options.extend(args)
+        if post_positional:
+            options.append("--")
+        for key, value in post_positional.items():
+            options.extend([key, value])
+        process = subprocess.Popen([self.path, *options], stdout=subprocess.PIPE)
 
         stdout, _ = process.communicate()
         if process.returncode != 0:
             print(stdout)
-            raise Exception(f'Non-zero exit code for {self.path} {options} {args}')
-        return stdout.decode('utf-8')
+            raise Exception(f"Non-zero exit code for {self.path} {options} {args}")
+        return stdout.decode("utf-8")
 
     def up(self, connection_name: str, **kwargs):
-        self.execute('up', connection_name, **kwargs)
+        self.execute("up", connection_name, **kwargs)
 
     def down(self, connection_name: str, **kwargs):
-        self.execute('down', connection_name, **kwargs)
+        self.execute("down", connection_name, **kwargs)
 
     def status(self, connection_name: str, **kwargs) -> ConnectionStatus:
-        result = self.execute('status', connection_name, **kwargs).strip()
-        if result == 'up':
+        result = self.execute("status", connection_name, **kwargs).strip()
+        if result == "up":
             return ConnectionStatus.Up
-        if result == 'down':
+        if result == "down":
             return ConnectionStatus.Down
-        raise Exception(f'Unrecognized status output: {result}')
+        raise Exception(f"Unrecognized status output: {result}")
 
 
 class Connection:
     def __init__(self, name: str, config: ConfigParser, client: Client):
-        if 'connection' not in config['vpn']:
-            raise Exception(f'Missing connection name for {name}')
+        if "connection" not in config["vpn"]:
+            raise Exception(f"Missing connection name for {name}")
         self.name = name
         self.config = config
         self.client = client
 
     def up(self):
-        if 'auth' in self.config:
-            kwargs = get_auth_args(self.config)
-        else:
-            kwargs = dict()
-        self.client.up(self.config['vpn']['connection'], **kwargs)
+        self.client.up(
+            self.config["vpn"]["connection"],
+            pre_positional=get_auth_args(self.config),
+            post_positional=get_extra_args(self.config),
+        )
 
     def down(self):
-        self.client.down(self.config['vpn']['connection'])
+        self.client.down(self.config["vpn"]["connection"])
 
     def status(self) -> ConnectionStatus:
-        return self.client.status(self.config['vpn']['connection'])
+        return self.client.status(self.config["vpn"]["connection"])
 
 
 class VpnSwitcher:
@@ -121,13 +148,15 @@ class VpnSwitcher:
         self.clients = self.create_clients()
         self.connections = self.create_connections(self.clients)
         self.switch_timeout = switch_timeout
-        notify2.init('VPN Switcher')
+        notify2.init("VPN Switcher")
 
     def create_clients(self) -> Mapping[str, Client]:
         client_files = os.listdir(CLIENTS_DIR)
         return {f: Client(f, os.path.join(CLIENTS_DIR, f)) for f in client_files}
 
-    def create_connections(self, clients: Mapping[str, Client]) -> Mapping[str, Connection]:
+    def create_connections(
+        self, clients: Mapping[str, Client]
+    ) -> Mapping[str, Connection]:
         connection_files = os.listdir(CONNECTIONS_DIR)
         connections = dict()
         for config_file in connection_files:
@@ -135,61 +164,66 @@ class VpnSwitcher:
             name = Path(config_path).stem
             config = ConfigParser()
             config.read(config_path)
-            if 'vpn' not in config:
-                raise Exception(f'Missing [vpn] section for connection {name}')
-            if 'client' not in config['vpn']:
-                raise Exception(f'Missing client for connection {name}')
-            client_name = config['vpn']['client']
+            if "vpn" not in config:
+                raise Exception(f"Missing [vpn] section for connection {name}")
+            if "client" not in config["vpn"]:
+                raise Exception(f"Missing client for connection {name}")
+            client_name = config["vpn"]["client"]
             if client_name not in clients:
-                raise Exception(f'Unknown client {client_name} for connection {name}')
+                raise Exception(f"Unknown client {client_name} for connection {name}")
             connections[name] = Connection(name, config, clients[client_name])
         return connections
 
+    def notify(self, connection_name: str, message: str):
+        notification = notify2.Notification(f"{connection_name} VPN", message)
+        notification.show()
+
     def switch(self, connection_name: str):
         if connection_name not in self.connections:
-            raise Exception(f'Unknown connection {connection_name}')
+            raise Exception(f"Unknown connection {connection_name}")
         for name, connection in self.connections.items():
             if name == connection_name:
                 continue
             if connection.status() == ConnectionStatus.Up:
-                print(f'Connection {name} currently active, deactivating')
+                print(f"Connection {name} currently active, deactivating")
                 connection.down()
 
         # Special case "none"
-        if connection_name == 'none':
-            print('All connections deactivated')
-            notification = notify2.Notification(f'{connection_name} VPN', 'All connections deactivated')
-            notification.show()
+        if connection_name == "none":
+            print("All connections deactivated")
+            self.notify(connection_name, "All connections deactivated")
             return
 
         connection = self.connections[connection_name]
         if connection.status() == ConnectionStatus.Up:
-            print(f'Connection {connection_name} already up, skipping')
+            print(f"Connection {connection_name} already up, skipping")
+            self.notify(connection_name, "Already active")
             return
 
         start_time = time.time()
-        print(f'Activating Connection {connection_name}')
+        print(f"Activating Connection {connection_name}")
         connection.up()
 
-        while (connection.status() != ConnectionStatus.Up
-               and time.time() - start_time < self.switch_timeout):
+        while (
+            connection.status() != ConnectionStatus.Up
+            and time.time() - start_time < self.switch_timeout
+        ):
             time.sleep(0.1)
 
         if connection.status() == ConnectionStatus.Up:
-            notification_message = 'Connection Succeeded'
+            notification_message = "Connection Succeeded"
         else:
-            notification_message = 'Connection Failed'
-        notification = notify2.Notification(f'{connection_name} VPN', notification_message)
-        notification.show()
+            notification_message = "Connection Failed"
+        self.notify(connection_name, notification_message)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Switch active VPN connection')
-    parser.add_argument('connection', help='connection name')
+    parser = argparse.ArgumentParser(description="Switch active VPN connection")
+    parser.add_argument("connection", help="connection name")
     args = parser.parse_args()
     switcher = VpnSwitcher()
     switcher.switch(args.connection)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

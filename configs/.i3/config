@@ -194,7 +194,11 @@ workspace "13:web" output primary
 assign [class="Emacs"] 12:emacs
 assign [class="Google-chrome"] 13:web
 assign [class="Slack"] 14:slack
-assign [title="Zoom Meeting"] 4
+assign [class="(.*join\?action\=join.*|.*zoom.*)" title="Zoom Meeting"] 4
+
+for_window [class="(.*join\?action\=join.*|.*zoom.*)"] floating enable
+for_window [class="(.*join\?action\=join.*|.*zoom.*)" title="Zoom - Licensed Account"] floating disable
+for_window [class="(.*join\?action\=join.*|.*zoom.*)" title="Zoom Meeting"] floating disable
 
 # Autostart applications
 exec --no-startup-id i3-msg 'workspace 11:term; exec i3-sensible-terminal'
