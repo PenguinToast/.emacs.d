@@ -191,7 +191,7 @@
   :ensure t
   :after ivy
   :demand
-  :bind (("C-x b" . persp-ivy-switch-buffer)
+  :bind (("C-x b" . persp-counsel-switch-buffer)
          ("C-x k" . persp-kill-buffer*)
          ("C-x C-b" . persp-ibuffer)
          :map perspective-map
@@ -416,9 +416,15 @@
   :hook (lsp . lsp-ui-mode)
   )
 
+(use-package yasnippet
+  :ensure t
+  :after (company)
+  :config
+  (yas-global-mode 1))
+
 (use-package company-lsp
   :ensure t
-  :after (lsp-mode company)
+  :after (lsp-mode company yasnippet)
   :commands company-lsp
   :config
   (push 'company-lsp company-backends)
@@ -682,6 +688,17 @@
   :ensure t
   :mode "\\.styl\\'")
 
+(use-package json-mode
+  :disabled)
+
+(use-package jsonian
+  :straight (jsonian :type git :host github :repo "iwahbe/jsonian")
+  :ensure t
+  :mode ("\\.json\\'")
+  :after so-long
+  :custom
+  (jsonian-no-so-long-mode))
+
 (use-package web-mode
   :ensure t
   :mode ("\\.html?\\'"
@@ -690,7 +707,6 @@
          "\\.hbs\\'"
          "\\.css\\'"
          "\\.tpl\\'"
-         "\\.json\\'"
          "\\.eslintrc\\'"
          "\\.tsx\\'")
   :init
@@ -935,6 +951,17 @@
  '(python-indent-offset 4)
  '(safe-local-variable-values
    '((eval let
+           ((project-directory
+             (car
+              (dir-locals-find-file default-directory))))
+           (setq-local lsp-eslint-working-directories
+                       (vector "."))
+           (setq-local lsp-eslint-node-path
+                       (concat project-directory ".yarn/sdks"))
+           (setq-local lsp-clients-typescript-server-args
+                       `("--tsserver-path" ,(concat project-directory ".yarn/sdks/typescript/bin/tsserver")
+                         "--stdio")))
+     (eval let
            ((project-directory
              (car
               (dir-locals-find-file default-directory))))

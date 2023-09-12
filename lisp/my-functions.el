@@ -36,7 +36,7 @@
       (setq swapping-buffer (current-buffer))
       (setq swapping-window (selected-window))
       (message "Buffer and window marked for swapping."))))
-(global-set-key (kbd "C-x p") 'swap-buffers-in-windows)
+(global-set-key (kbd "C-x c p") 'swap-buffers-in-windows)
 
 (defun move-buffer-to-largest-window ()
   "Move current buffer to largest window."
@@ -45,7 +45,7 @@
   (setq swapping-window (selected-window))
   (select-window (get-largest-window nil nil t))
   (swap-buffers-in-windows))
-(global-set-key (kbd "C-x c") 'move-buffer-to-largest-window)
+(global-set-key (kbd "C-x c c") 'move-buffer-to-largest-window)
 
 (defun rename-current-buffer-file ()
   "Renames current buffer and file it is visiting."
