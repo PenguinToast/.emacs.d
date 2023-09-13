@@ -31,7 +31,7 @@ font pango:monospace 8
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec i3-sensible-terminal
+bindsym $mod+Return exec foot
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -152,11 +152,24 @@ bindsym $mod+r mode "resize"
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
+# bar {
+#     font pango:monospace 12
+#     status_command py3status -c ~/.i3/i3status.conf -i ~/.i3/modules/
+#     strip_workspace_numbers yes
+#     mode hide
+# }
 bar {
-    font pango:monospace 12
-    status_command py3status -c ~/.i3/i3status.conf -i ~/.i3/modules/
-    strip_workspace_numbers yes
+    swaybar_command waybar
+    position bottom
+    hidden_state hide
     mode hide
+    modifier Mod4
+}
+
+input type:keyboard {
+  # Capslock key should work as escape key
+  # See /usr/share/X11/xkb/rules/xorg.lst for options
+  xkb_options ctrl:nocaps
 }
 
 # Move the current workspace to the next output
@@ -165,15 +178,25 @@ bindsym $mod+c move workspace to output right
 
 workspace_auto_back_and_forth yes
 
-exec_always xmodmap ~/.xmodmap
-exec_always xset r rate 300 35 # Set initial delay 300ms, repeat 35ms
+# exec_always xmodmap ~/.xmodmap
+# exec_always xset r rate 300 35 # Set initial delay 300ms, repeat 35ms
 
-exec --no-startup-id nm-applet
+# Notification daemon
+exec swaync
+
+# Toggle control center
+bindsym $mod+Shift+n exec swaync-client -t -sw
+
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec hash dbus-update-activation-environment 2>/dev/null && \
+     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+
+exec --no-startup-id nm-applet --indicator
 exec --no-startup-id udiskie --tray
 exec --no-startup-id /usr/libexec/geoclue-2.0/demos/agent
-exec --no-startup-id redshift
-exec --no-startup-id light-locker
-exec --no-startup-id dropbox start
+exec --no-startup-id gammastep-indicator
+# exec --no-startup-id light-locker
+# exec --no-startup-id dropbox start
 
 # Named workspaces
 bindsym $mod+a workspace 11:term
@@ -201,7 +224,7 @@ for_window [class="(.*join\?action\=join.*|.*zoom.*)" title="Zoom - Licensed Acc
 for_window [class="(.*join\?action\=join.*|.*zoom.*)" title="Zoom Meeting"] floating disable
 
 # Autostart applications
-exec --no-startup-id i3-msg 'workspace 11:term; exec i3-sensible-terminal'
+exec --no-startup-id i3-msg 'workspace 11:term; exec foot'
 exec --no-startup-id i3-msg 'workspace 12:emacs; exec emacs'
 # exec --no-startup-id i3-msg 'workspace 14:slack; exec slack'
 exec --no-startup-id i3-msg 'workspace 13:web; exec google-chrome'
@@ -244,8 +267,8 @@ mode "$mode_system" {
 }
 bindsym $mod+Escape mode "$mode_system"
 
-bindsym --release Print exec shutter -s
-bindsym --release Shift+Print exec shutter -w
+# bindsym --release Print exec shutter -s
+# bindsym --release Shift+Print exec shutter -w
 
 exec --no-startup-id xcompmgr -c -l0 -t0 -r0 -o.00
 exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png

@@ -399,9 +399,13 @@
                               (indent defun)))
   (advice-add 'lsp :before (lambda (&rest _args) (eval '(setf (lsp-session-server-id->folders (lsp-session)) (ht)))))
   (willsheu/lsp-rust-setup)
-  ;; (willsheu/lsp-eslint-setup)
-  (willsheu/lsp-pylsp-setup)
   )
+
+(use-package lsp-pylsp
+  :straight nil
+  :after lsp-mode
+  :config
+  (willsheu/lsp-pylsp-setup))
 
 (use-package lsp-eslint
   :straight nil
@@ -905,6 +909,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(tab-width 2)
  '(ccls-executable "/home/william/package_src/ccls/Release/ccls")
  '(comment-multi-line t)
  '(confirm-kill-emacs 'y-or-n-p)
