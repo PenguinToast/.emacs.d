@@ -124,6 +124,7 @@
   :bind ("M-/" . company-complete)
   :config
   (global-company-mode)
+  (setq company-dabbrev-downcase nil)
   (use-package company-quickhelp
     :ensure t
     :bind (:map company-active-map
@@ -135,7 +136,7 @@
   )
 
 (use-package company-box
-  :disabled
+  ;; :disabled
   :ensure t
   :after company
   :hook (company-mode . company-box-mode))
@@ -420,6 +421,17 @@
   :hook (lsp . lsp-ui-mode)
   )
 
+;; TODO: Replace with in-emacs tree-sitter once integration is better
+(use-package tree-sitter
+  :ensure t
+  :config
+  (global-tree-sitter-mode)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :ensure t
+  :after (tree-sitter))
+
 (use-package yasnippet
   :ensure t
   :after (company)
@@ -488,6 +500,16 @@
   :after (treemacs perspective)
   :ensure t
   :config (treemacs-set-scope-type 'Perspectives))
+
+(use-package copilot
+  :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
+  :ensure t
+  :hook (prog-mode . copilot-mode)
+  :bind (:map copilot-completion-map
+              ("<tab>" . 'copilot-accept-completion)
+              ("TAB" . 'copilot-accept-completion)
+              ("C-TAB" . 'copilot-accept-completion-by-word)
+              ("C-<tab>" . 'copilot-accept-completion-by-word)))
 
 ;; Language:
 

@@ -44,7 +44,7 @@
         "spacing": 10
     },
     "clock": {
-        "timezone": "America/Los_Angeles",
+        // "timezone": "America/Los_Angeles",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format": "{:%a %Y-%m-%d %I:%M %p}",
         "format-alt": "{:%Y-%m-%d}"
@@ -67,7 +67,7 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "{capacity}% {icon}",
+        "format": "{capacity}% {time} {icon}",
         "format-charging": "{capacity}% ",
         "format-plugged": "{capacity}% ",
         "format-alt": "{time} {icon}",

@@ -2,13 +2,7 @@
 
 lock() {
     # dm-tool lock
-    TMPBG=/tmp/screen.png
-    RES=1366x768
-
-    ffmpeg -f x11grab -y -i $DISPLAY -filter_complex "boxblur=20:2,eq=gamma=0.8" -vframes 1 $TMPBG
-
-    # Lock screen displaying this image.
-    i3lock -i $TMPBG
+    swaylock --screenshots --clock --indicator --submit-on-touch --fade-in 0.1 --effect-blur 7x5
 }
 
 case "$1" in
@@ -20,7 +14,7 @@ case "$1" in
         ;;
     suspend)
         # lock && systemctl suspend
-	      systemctl suspend
+	      systemctl suspend && lock
         ;;
     hibernate)
         lock && systemctl hibernate

@@ -187,9 +187,9 @@ exec swaync
 # Toggle control center
 bindsym $mod+Shift+n exec swaync-client -t -sw
 
-exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
-exec hash dbus-update-activation-environment 2>/dev/null && \
-     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+# exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+# exec hash dbus-update-activation-environment 2>/dev/null && \
+     # dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
 
 exec --no-startup-id nm-applet --indicator
 exec --no-startup-id udiskie --tray
@@ -226,7 +226,7 @@ for_window [class="(.*join\?action\=join.*|.*zoom.*)" title="Zoom Meeting"] floa
 # Autostart applications
 exec --no-startup-id i3-msg 'workspace 11:term; exec foot'
 exec --no-startup-id i3-msg 'workspace 12:emacs; exec emacs'
-# exec --no-startup-id i3-msg 'workspace 14:slack; exec slack'
+exec --no-startup-id i3-msg 'workspace 14:slack; exec slack'
 exec --no-startup-id i3-msg 'workspace 13:web; exec google-chrome'
 exec --no-startup-id i3-msg 'workspace 1'
 
@@ -267,12 +267,15 @@ mode "$mode_system" {
 }
 bindsym $mod+Escape mode "$mode_system"
 
-# bindsym --release Print exec shutter -s
+bindsym --release Print exec grim -g "$(slurp -d)" - | swappy -f -
 # bindsym --release Shift+Print exec shutter -w
 
-exec --no-startup-id xcompmgr -c -l0 -t0 -r0 -o.00
-exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png
-exec --no-startup-id xset s off
+# exec --no-startup-id xcompmgr -c -l0 -t0 -r0 -o.00
+# exec --no-startup-id feh --bg-fill /home/william/ubuntu_blue.png
+# exec --no-startup-id xset s off
+# exec way-displays > /tmp/way-displays.${XDG_VTNR}.${USER}.log 2>&1
+exec --no-startup-id kanshi
 
 include ~/.config/i3/config.d/`hostname`.conf
+include /etc/sway/config.d/*
 
